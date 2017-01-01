@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# xRBM documentation build configuration file, created by
-# sphinx-quickstart on Fri Dec 30 15:57:17 2016.
+# xRBM Library documentation build configuration file, created by
+# sphinx-quickstart on Fri Dec 30 18:04:07 2016.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -17,10 +17,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../'))
 
 # -- General configuration ------------------------------------------------
 
@@ -33,9 +32,10 @@
 # ones.
 extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.todo',
-    'sphinx.ext.mathjax',
+    # 'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages']
+    'sphinx.ext.githubpages',
+    'sphinx.ext.napoleon']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -50,7 +50,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'xRBM'
+project = 'xRBM Library'
 copyright = '2016, Omid Alemi'
 author = 'Omid Alemi'
 
@@ -73,7 +73,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -104,7 +104,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'xRBMdoc'
+htmlhelp_basename = 'xRBMLibrarydoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -131,7 +131,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'xRBM.tex', 'xRBM Documentation',
+    (master_doc, 'xRBMLibrary.tex', 'xRBM Library Documentation',
      'Omid Alemi', 'manual'),
 ]
 
@@ -141,7 +141,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'xrbm', 'xRBM Documentation',
+    (master_doc, 'xrbmlibrary', 'xRBM Library Documentation',
      [author], 1)
 ]
 
@@ -152,8 +152,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'xRBM', 'xRBM Documentation',
-     author, 'xRBM', 'One line description of project.',
+    (master_doc, 'xRBMLibrary', 'xRBM Library Documentation',
+     author, 'xRBMLibrary', 'One line description of project.',
      'Miscellaneous'),
 ]
 

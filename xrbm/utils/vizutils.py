@@ -1,5 +1,7 @@
-import numpy
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
+import numpy
 
 def plotWeights(fig, W, A, B):    
     ax = fig.add_subplot(331, title='W')

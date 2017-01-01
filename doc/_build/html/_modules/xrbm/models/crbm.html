@@ -1,0 +1,713 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>xrbm.models.crbm &mdash; xRBM Library 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="xRBM Library 0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for xrbm.models.crbm</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Restricted Boltzmann Machines (RBM) Implementation in Tensorflow</span>
+<span class="c1"># Created by Omid Alemi</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.io</span> <span class="kn">as</span> <span class="nn">sio</span>
+<span class="kn">from</span> <span class="nn">xrbm.utils</span> <span class="kn">import</span> <span class="n">tfutils</span>
+<span class="kn">from</span> <span class="nn">xrbm.utils</span> <span class="kn">import</span> <span class="n">costs</span> <span class="k">as</span> <span class="n">costs</span>
+<span class="kn">from</span> <span class="nn">.abstract_model</span> <span class="kn">import</span> <span class="n">AbstractRBM</span>
+
+<div class="viewcode-block" id="CRBM"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM">[docs]</a><span class="k">class</span> <span class="nc">CRBM</span><span class="p">(</span><span class="n">AbstractRBM</span><span class="p">):</span>
+    <span class="s1">&#39;Conditional Restricted Boltzmann Machines (CRBM)&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_vis</span><span class="p">,</span> <span class="n">num_cond</span><span class="p">,</span> <span class="n">num_hid</span><span class="p">,</span> <span class="n">vis_type</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span>
+                 <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">,</span>  <span class="n">name</span><span class="o">=</span><span class="s1">&#39;CRBM&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The CRBM Constructor</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        num_vis:       int</span>
+<span class="sd">            number of visible input units</span>
+<span class="sd">        num_cond:       int</span>
+<span class="sd">            number of condition units</span>
+<span class="sd">        num_hid:       int</span>
+<span class="sd">            number of hidden units</span>
+<span class="sd">        vis_type:      string</span>
+<span class="sd">            the type of the visible units (`binary` or `gaussian`)</span>
+<span class="sd">        activation:    callable f(h)</span>
+<span class="sd">            a function reference to the activation function of the hidden units</span>
+<span class="sd">        name:          string</span>
+<span class="sd">            the name of the object (used for Tensorflow&#39;s scope)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CRBM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">num_vis</span><span class="p">,</span> <span class="n">num_hid</span><span class="p">,</span> <span class="n">vis_type</span><span class="p">,</span> <span class="n">activation</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># Model Params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_cond</span> <span class="o">=</span> <span class="n">num_cond</span>
+
+        <span class="c1"># Weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c1"># Biases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c1"># Learning params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wu</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">au</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bu</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vbu</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hbu</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_placeholders_variables</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CRBM.create_placeholders_variables"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.create_placeholders_variables">[docs]</a>    <span class="k">def</span> <span class="nf">create_placeholders_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sp_hidden_means</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;sp_hidden_means&#39;</span><span class="p">,</span>
+                                                   <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span>
+                                                   <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="mf">0.2</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">data_variable</span><span class="p">((</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">),</span><span class="s1">&#39;input_data&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cond_data</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">data_variable</span><span class="p">((</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cond</span><span class="p">),</span><span class="s1">&#39;condition_data&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;params&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">weight_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;main_weights&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">weight_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">],</span> <span class="s1">&#39;c2v_weights&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">weight_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;c2h_weights&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">bias_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">],</span> <span class="s1">&#39;vbias&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">bias_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;hbias&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="p">]</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;updates&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wu</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">weight_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;main_weights&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">au</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">weight_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">],</span> <span class="s1">&#39;c2v_weights&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bu</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">weight_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;c2h_weights&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">vbu</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">bias_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">],</span> <span class="s1">&#39;vbias&#39;</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hbu</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">bias_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;hbias&#39;</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">))</span>           </div>
+
+
+<div class="viewcode-block" id="CRBM.sample_h_from_vc"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.sample_h_from_vc">[docs]</a>    <span class="k">def</span> <span class="nf">sample_h_from_vc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">n</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a sample of hidden units, given a tensor of visible and condition units configuations</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        visible:    tensor</span>
+<span class="sd">            a tensor of visible units configurations</span>
+<span class="sd">        </span>
+<span class="sd">        cond:    tensor</span>
+<span class="sd">            a tensor of condition units configurations</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bottom_up:      tensor</span>
+<span class="sd">            a tensor containing the bottom up contributions before activation</span>
+<span class="sd">        </span>
+<span class="sd">        h_prob_means:   tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the hidden units activations</span>
+
+<span class="sd">        h_samples:      tensor</span>
+<span class="sd">            a tensor containing a bernoulli sample generated from the mean activations</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;sampling_hv&#39;</span><span class="p">):</span>
+            <span class="n">bottom_up</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">visible</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># visible to hidden </span>
+                         <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span> <span class="o">+</span>  <span class="c1"># condition to hidden</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="p">)</span> <span class="c1"># static hidden biases</span>
+
+            <span class="n">h_probs_means</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">bottom_up</span><span class="p">)</span>
+            <span class="n">h_samples</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">sample_bernoulli</span><span class="p">(</span><span class="n">h_probs_means</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">bottom_up</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span></div>
+
+<div class="viewcode-block" id="CRBM.sample_v_from_hc"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.sample_v_from_hc">[docs]</a>    <span class="k">def</span> <span class="nf">sample_v_from_hc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">n</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a sample of visible units, given a tensor of hidden and condition units configuations</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        hidden:    tensor</span>
+<span class="sd">            a tensor of hidden units configurations</span>
+
+<span class="sd">        cond:    tensor</span>
+<span class="sd">            a tensor of condition units configurations</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        top_bottom:      tensor</span>
+<span class="sd">            a tensor containing the top bottom contributions</span>
+<span class="sd">        </span>
+<span class="sd">        v_probs_means:   tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the visible units</span>
+
+<span class="sd">        v_samples:      tensor</span>
+<span class="sd">            a tensor containing a sample of visible units generated from the top bottom contributions</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;sampling_vh&#39;</span><span class="p">):</span>
+            <span class="n">contributions</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">hidden</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">))</span> <span class="o">+</span> <span class="c1"># hidden to visible</span>
+                          <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># condition to visible</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="p">)</span> <span class="c1"># static visible biases</span>
+
+            <span class="n">v_probs_means</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">contributions</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>                
+                <span class="n">v_samples</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">sample_bernoulli</span><span class="p">(</span><span class="n">v_probs_means</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">:</span>
+                <span class="n">v_samples</span> <span class="o">=</span> <span class="n">contributions</span> <span class="c1"># using means instead of sampling, as in Taylor et al</span>
+
+
+        <span class="k">return</span> <span class="n">contributions</span><span class="p">,</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span></div>
+
+<div class="viewcode-block" id="CRBM.gibbs_sample_hvh"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.gibbs_sample_hvh">[docs]</a>    <span class="k">def</span> <span class="nf">gibbs_sample_hvh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_samples0</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs a cycle of gibbs sampling, started with an initial hidden units activations</span>
+
+<span class="sd">        Used for training</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        h_samples0:    tensor</span>
+<span class="sd">            a tensor of initial hidden units activations</span>
+<span class="sd">        </span>
+<span class="sd">        cond:    tensor</span>
+<span class="sd">            a tensor of condition units configurations</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        v_probs_means:  tensor</span>
+
+<span class="sd">        v_samples:      tensor</span>
+<span class="sd">            visible samples</span>
+<span class="sd">        h_probs_means:  tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the hidden units activations</span>
+<span class="sd">        h_samples:      tensor</span>
+<span class="sd">            a tensor containing a bernoulli sample generated from the mean activations</span>
+<span class="sd">        &quot;&quot;&quot;</span>       
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;sampling_hvh&#39;</span><span class="p">):</span>
+            <span class="c1"># v from h</span>
+            <span class="n">top_bottom</span><span class="p">,</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_v_from_hc</span><span class="p">(</span><span class="n">h_samples0</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+            <span class="c1"># h from v</span>
+            <span class="n">bottom_up</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_h_from_vc</span><span class="p">(</span><span class="n">v_samples</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span></div>
+
+<div class="viewcode-block" id="CRBM.gibbs_sample_hvh_condcont"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.gibbs_sample_hvh_condcont">[docs]</a>    <span class="k">def</span> <span class="nf">gibbs_sample_hvh_condcont</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_samples0</span><span class="p">,</span> <span class="n">condontA</span><span class="p">,</span> <span class="n">condontB</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs a cycle of gibbs sampling, started with an initial hidden units activations</span>
+
+<span class="sd">        Uses pre-computed contributions from condition units to both hidden and visible units</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        h_samples0:    tensor</span>
+<span class="sd">            a tensor of initial hidden units activations</span>
+<span class="sd">        </span>
+<span class="sd">        condontA:    tensor</span>
+<span class="sd">            a tensor of contributions from condition to visible units</span>
+
+<span class="sd">        condontB:    tensor</span>
+<span class="sd">            a tensor of contributions from condition to hidden units</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        v_probs_means:  tensor</span>
+
+<span class="sd">        v_samples:      tensor</span>
+<span class="sd">            visible samples</span>
+<span class="sd">        h_probs_means:  tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the hidden units activations</span>
+<span class="sd">        h_samples:      tensor</span>
+<span class="sd">            a tensor containing a bernoulli sample generated from the mean activations</span>
+<span class="sd">        &quot;&quot;&quot;</span>               
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;sampling_hvh&#39;</span><span class="p">):</span>
+            <span class="c1"># v from h</span>
+            <span class="n">contributions_to_vis</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">h_samples0</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">))</span> <span class="o">+</span> <span class="c1"># hidden to visible</span>
+                          <span class="n">condontA</span> <span class="o">+</span> <span class="c1"># condition to visible</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="p">)</span> <span class="c1"># static visible biases</span>
+
+            <span class="n">v_probs_means</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">contributions_to_vis</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>                
+                <span class="n">v_samples</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">sample_bernoulli</span><span class="p">(</span><span class="n">v_probs_means</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">:</span>
+                <span class="n">v_samples</span> <span class="o">=</span> <span class="n">contributions_to_vis</span> <span class="c1"># using means instead of sampling, as in Taylor et al</span>
+
+
+            <span class="c1"># h from v            </span>
+            <span class="n">contributions_to_hid</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">v_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># visible to hidden </span>
+                         <span class="n">condontB</span> <span class="o">+</span>  <span class="c1"># condition to hidden</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="p">)</span> <span class="c1"># static hidden biases</span>
+
+            <span class="n">h_probs_means</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">contributions_to_hid</span><span class="p">)</span>
+            <span class="n">h_samples</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">sample_bernoulli</span><span class="p">(</span><span class="n">h_probs_means</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+
+        <span class="k">return</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span></div>
+    
+<div class="viewcode-block" id="CRBM.gibbs_sample_vhv"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.gibbs_sample_vhv">[docs]</a>    <span class="k">def</span> <span class="nf">gibbs_sample_vhv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_samples0</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs a cycle of gibbs sampling, started with an initial visible and condition units configurations</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_samples0:    tensor</span>
+<span class="sd">            a tensor of initial visible units configuration</span>
+<span class="sd">        </span>
+<span class="sd">        cond:    tensor</span>
+<span class="sd">            a tensor of condition units configurations</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        v_probs_means:  tensor</span>
+
+<span class="sd">        v_samples:      tensor</span>
+<span class="sd">            visible samples</span>
+<span class="sd">        h_probs_means:  tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the hidden units activations</span>
+<span class="sd">        h_samples:      tensor</span>
+<span class="sd">            a tensor containing a bernoulli sample generated from the mean activations</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;sampling_vhv&#39;</span><span class="p">):</span>
+            <span class="c1"># h from v</span>
+            <span class="n">bottom_up</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_h_from_vc</span><span class="p">(</span><span class="n">v_samples0</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+            <span class="c1"># v from h</span>
+            <span class="n">top_bottom</span><span class="p">,</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_v_from_hc</span><span class="p">(</span><span class="n">h_samples</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span></div>
+
+<div class="viewcode-block" id="CRBM.inference"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.inference">[docs]</a>    <span class="k">def</span> <span class="nf">inference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">cond_data</span><span class="p">,</span> <span class="n">cd_k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sparse_target</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_cost</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_decay</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Defines the tensorflow operations for inference</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_data:     tensor</span>
+<span class="sd">            the input (batch) data tensor</span>
+<span class="sd">        cond_data:      tensor</span>
+<span class="sd">            the condition data tensor</span>
+<span class="sd">        cd_k=1:         int, default 1</span>
+<span class="sd">            the number of CD steps for gibbs sampling</span>
+<span class="sd">        sparse_target:  float, default 0</span>
+<span class="sd">            the sparsity target</span>
+<span class="sd">        sparse_cost:    float, default 0</span>
+<span class="sd">            the sparsity cost</span>
+<span class="sd">        sparse_decay:   float, default 0</span>
+<span class="sd">            the sparsity weight decay</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        v_probs_means:  tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the visible units</span>
+<span class="sd">        chain_end:      tensor</span>
+<span class="sd">            the last visible samples generated in the gibbs cycles</span>
+<span class="sd">        sparse_grad:    tensor</span>
+<span class="sd">            the sparisity gradients</span>
+<span class="sd">        current_activations_mean_props:     tensor</span>
+<span class="sd">            the mean activation of the hidden units</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;inference&#39;</span><span class="p">):</span>
+            <span class="c1">### positive phase</span>
+            <span class="c1"># bottom-up - initialze the network with training data</span>
+            
+            <span class="n">_</span><span class="p">,</span> <span class="n">h_probs_means1</span><span class="p">,</span> <span class="n">h_samples1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_h_from_vc</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">cond</span><span class="o">=</span><span class="n">cond_data</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+
+            <span class="n">chain_data</span> <span class="o">=</span> <span class="n">h_samples1</span>
+
+            <span class="c1"># calculate the sparsity term</span>
+            <span class="n">current_activations_mean_props</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">h_probs_means1</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">sp_hidden_means</span> <span class="o">=</span> <span class="n">sparse_decay</span> <span class="o">*</span> <span class="n">current_activations_mean_props</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sparse_decay</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sp_hidden_means</span>
+            <span class="n">sparse_grad</span> <span class="o">=</span> <span class="n">sparse_cost</span> <span class="o">*</span> <span class="p">(</span><span class="n">sparse_target</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">sp_hidden_means</span><span class="p">)</span>
+            
+            <span class="n">current_activations_mean_props</span> <span class="o">=</span> <span class="n">h_probs_means1</span>
+            <span class="n">sparse_grad</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># v_samples = tf.stop_gradient(v_samples)</span>
+
+            <span class="n">condcontA</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cond_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">)</span>
+            <span class="n">condcontB</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cond_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cd_k</span><span class="p">):</span> <span class="c1">#TODO: this has to be more efficient since cond_data does not change</span>
+                <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gibbs_sample_hvh_condcont</span><span class="p">(</span><span class="n">chain_data</span><span class="p">,</span> 
+                                                            <span class="n">condcontA</span><span class="p">,</span>
+                                                            <span class="n">condcontB</span><span class="p">,</span>
+                                                            <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+                <span class="n">chain_data</span> <span class="o">=</span> <span class="n">h_samples</span>
+
+            <span class="c1">### update</span>
+            <span class="n">chain_end</span> <span class="o">=</span> <span class="n">v_samples</span>
+
+        <span class="k">return</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">chain_end</span><span class="p">,</span> <span class="n">sparse_grad</span><span class="p">,</span> <span class="n">current_activations_mean_props</span></div>
+
+<div class="viewcode-block" id="CRBM.train_step"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.train_step">[docs]</a>    <span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible_data</span><span class="p">,</span> <span class="n">cond_data</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span>
+                   <span class="n">momentum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">wdecay</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cd_k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                   <span class="n">sparse_target</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_cost</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_decay</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Defines the operations needed for a training step of a CRBM</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        visible_data:       tensor</span>
+<span class="sd">            the input (batch) data tensor</span>
+<span class="sd">        cond_data:      tensor</span>
+<span class="sd">            the condition data tensor</span>
+<span class="sd">        learning_rate:      float</span>
+<span class="sd">            the learning rate</span>
+<span class="sd">        momentum:           float, default 0</span>
+<span class="sd">            the momentum value</span>
+<span class="sd">        wdecay:             float, default 0</span>
+<span class="sd">            the weight decay value</span>
+<span class="sd">        cd_k:               int, default 1</span>
+<span class="sd">            the number of CD steps for gibbs sampling</span>
+<span class="sd">        sparse_target:  float, default 0</span>
+<span class="sd">            the sparsity target</span>
+<span class="sd">        sparse_cost:    float, default 0</span>
+<span class="sd">            the sparsity cost</span>
+<span class="sd">        sparse_decay:   float, default 0</span>
+<span class="sd">            the sparsity weight decay</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        rec_cost:       float</span>
+<span class="sd">            the reconstruction cost for this step</span>
+<span class="sd">        new_params:     list of tensors</span>
+<span class="sd">            the updated model parameters</span>
+<span class="sd">        updates:        list of tensors</span>
+<span class="sd">            the value of updates for each model parameter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">learning_rateW</span> <span class="o">=</span> <span class="n">learning_rate</span>
+        <span class="n">learning_rateA</span> <span class="o">=</span> <span class="n">learning_rate</span> <span class="o">*</span> <span class="mf">0.01</span> <span class="c1"># it&#39;s a hack, the autoregressive weights often need a smaller lr</span>
+        <span class="n">learning_rateB</span> <span class="o">=</span> <span class="n">learning_rate</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;train_step&#39;</span><span class="p">):</span>
+            <span class="c1">## inference</span>
+            <span class="p">(</span><span class="n">chain_end_probs_means</span><span class="p">,</span> 
+            <span class="n">chain_end</span><span class="p">,</span> 
+            <span class="n">sparse_grad</span><span class="p">,</span> 
+            <span class="n">current_activations_mean_props</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">visible_data</span><span class="p">,</span> <span class="n">cond_data</span><span class="p">,</span> 
+                                                             <span class="n">cd_k</span><span class="p">,</span> <span class="n">sparse_target</span><span class="p">,</span> <span class="n">sparse_cost</span><span class="p">,</span> <span class="n">sparse_decay</span><span class="p">)</span>
+
+            <span class="c1">## update</span>
+             <span class="c1"># get the cost using free energy</span>
+            <span class="n">cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cost</span><span class="p">(</span><span class="n">visible_data</span><span class="p">,</span> <span class="n">cond_data</span><span class="p">,</span> <span class="n">chain_end</span><span class="p">)</span>
+
+             <span class="c1"># calculate the gradients using tf</span>
+            <span class="n">grad_params</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">ys</span><span class="o">=</span><span class="n">cost</span><span class="p">,</span> <span class="n">xs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_params</span><span class="p">)</span>
+
+             <span class="c1"># compose the update values, incorporating weight decay, momentum, and sparsity terms</span>
+            <span class="n">wu_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wu</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">momentum</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">wu</span> <span class="o">-</span> <span class="p">(</span><span class="n">grad_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">sparse_grad</span> <span class="o">-</span> <span class="n">wdecay</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">*</span> <span class="n">learning_rateW</span><span class="p">)</span>
+            <span class="n">au_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">au</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">momentum</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">au</span> <span class="o">-</span> <span class="p">(</span><span class="n">grad_params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">wdecay</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">)</span> <span class="o">*</span> <span class="n">learning_rateA</span><span class="p">)</span>
+            <span class="n">bu_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bu</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">momentum</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">bu</span> <span class="o">-</span> <span class="p">(</span><span class="n">grad_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">wdecay</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span> <span class="o">*</span> <span class="n">learning_rateB</span><span class="p">)</span>
+            <span class="n">vbu_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbu</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">momentum</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbu</span> <span class="o">-</span> <span class="n">grad_params</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">learning_rate</span><span class="p">)</span>
+            <span class="n">hbu_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbu</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">momentum</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbu</span> <span class="o">-</span> <span class="p">(</span><span class="n">grad_params</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">-</span> <span class="n">sparse_grad</span><span class="p">)</span> <span class="o">*</span> <span class="n">learning_rate</span><span class="p">)</span>
+
+            <span class="n">updates</span> <span class="o">=</span> <span class="p">[</span><span class="n">wu_</span><span class="p">,</span> <span class="n">au_</span><span class="p">,</span> <span class="n">bu_</span><span class="p">,</span> <span class="n">vbu_</span><span class="p">,</span> <span class="n">hbu_</span><span class="p">]</span>
+
+             <span class="c1"># ops to update the parameters</span>
+            <span class="n">w_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">assign_add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wu</span><span class="p">)</span>
+            <span class="n">a_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">assign_add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">au</span><span class="p">)</span>
+            <span class="n">b_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">assign_add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bu</span><span class="p">)</span>
+            <span class="n">vb_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="o">.</span><span class="n">assign_add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vbu</span><span class="p">)</span>
+            <span class="n">hb_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="o">.</span><span class="n">assign_add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hbu</span><span class="p">)</span>
+
+             <span class="c1"># we need to return the new params so that tf considers them in the graph</span>
+            <span class="n">new_params_ops</span> <span class="o">=</span> <span class="p">[</span><span class="n">w_</span><span class="p">,</span> <span class="n">a_</span><span class="p">,</span> <span class="n">b_</span><span class="p">,</span> <span class="n">vb_</span><span class="p">,</span> <span class="n">hb_</span><span class="p">]</span>
+
+            <span class="c1">## evaluate the reconstruction capability of the model</span>
+            <span class="n">rec_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reconstruction_cost</span><span class="p">(</span><span class="n">visible_data</span><span class="p">,</span> <span class="n">chain_end_probs_means</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">rec_cost</span><span class="p">,</span> <span class="n">new_params_ops</span><span class="p">,</span> <span class="n">updates</span><span class="p">,</span> <span class="n">current_activations_mean_props</span> <span class="c1">#TODO: Remove</span></div>
+
+<div class="viewcode-block" id="CRBM.get_cost"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.get_cost">[docs]</a>    <span class="k">def</span> <span class="nf">get_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_sample</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">chain_end</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the free-energy cost between two data tensors, used for calcuating the gradients</span>
+<span class="sd">    </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_sample:   tensor</span>
+<span class="sd">            the tensor A</span>
+<span class="sd">        cond:   tensor</span>
+<span class="sd">            the condition tensor</span>
+<span class="sd">        chain_end:  tensor</span>
+<span class="sd">            the tensor B</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        cost:       float</span>
+<span class="sd">            the cost</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;fe_cost&#39;</span><span class="p">):</span>
+            <span class="n">cost</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">free_energy</span><span class="p">(</span><span class="n">v_sample</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+                    <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">free_energy</span><span class="p">(</span><span class="n">chain_end</span><span class="p">,</span> <span class="n">cond</span><span class="p">),</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cost</span></div>
+
+<div class="viewcode-block" id="CRBM.get_reconstruction_cost"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.get_reconstruction_cost">[docs]</a>    <span class="k">def</span> <span class="nf">get_reconstruction_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">recon_means</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the reconstruction cost between input data and reconstructed data</span>
+<span class="sd">    </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_data:   tensor</span>
+<span class="sd">            the input data tensor</span>
+<span class="sd">        recon_means:  tensor</span>
+<span class="sd">            the reconstructed data tensor</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        cost:       float</span>
+<span class="sd">            the reconstruction cost</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="n">costs</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">recon_means</span><span class="p">)</span>
+        <span class="c1"># cost = costs.mse(input_data, recon_means)</span>
+        <span class="k">return</span> <span class="n">cost</span></div>
+
+<div class="viewcode-block" id="CRBM.free_energy"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.free_energy">[docs]</a>    <span class="k">def</span> <span class="nf">free_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_sample</span><span class="p">,</span> <span class="n">cond</span><span class="p">):</span>  <span class="c1">#TODO: change     </span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calcuates the free-energy of a given visible tensor</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_sample:   tensor</span>
+<span class="sd">            the visible units tensor</span>
+<span class="sd">        cond:       tensor</span>
+<span class="sd">            the condition units tensor</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        e:  float</span>
+<span class="sd">            the free energy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;free_energy&#39;</span><span class="p">):</span>
+            <span class="n">bottom_up</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">v_sample</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># visible to hidden </span>
+                         <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># condition to hidden</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="p">)</span> <span class="c1"># static hidden biases</span>
+            
+            <span class="n">vbias_n_cond</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">v_sample</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">vbias_n_cond</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;bin_visible_term&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">v_sample</span> <span class="o">-</span> <span class="n">vbias_n_cond</span><span class="p">),</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;gauss_visible_term&#39;</span><span class="p">)</span>            
+
+            <span class="n">h</span> <span class="o">=</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">bottom_up</span><span class="p">)),</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;hidden_term&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>        </div>
+    
+<div class="viewcode-block" id="CRBM.make_prediction"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.make_prediction">[docs]</a>    <span class="k">def</span> <span class="nf">make_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span>  <span class="n">num_gibbs</span><span class="o">=</span><span class="mi">20</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate (predict) the visible units configuration given the conditions</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------        </span>
+<span class="sd">        cond:       tensor</span>
+<span class="sd">            the condition units tensor</span>
+<span class="sd">        init:       tensor</span>
+<span class="sd">            the configuation to initialize the visible units with</span>
+<span class="sd">        num_gibbs:  int, default 20</span>
+<span class="sd">            the number of gibbs sampling cycles</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sample:     tensor</span>
+<span class="sd">            the predicted visible units</span>
+<span class="sd">        hsample:    tensor</span>
+<span class="sd">            the hidden units activations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># gibbs</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_gibbs</span><span class="p">):</span> <span class="c1">#TODO: this has to be more efficient since cond_data does not change</span>
+            <span class="n">vmean</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">hmean</span><span class="p">,</span> <span class="n">hsample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gibbs_sample_vhv</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">init</span> <span class="o">=</span> <span class="n">sample</span>
+        
+        <span class="c1"># mean-field approximation as suggested by Taylor</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">vmean</span><span class="p">,</span> <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_v_from_hc</span><span class="p">(</span><span class="n">hmean</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sample</span><span class="p">,</span> <span class="n">hsample</span></div>
+
+
+<div class="viewcode-block" id="CRBM.train"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sess</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">cond_data</span><span class="p">,</span> <span class="n">training_epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                    <span class="n">snapshot_dir</span><span class="o">=</span><span class="s1">&#39;./logs/&#39;</span><span class="p">,</span> <span class="n">snapshot_freq</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cd_k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">momentum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">wdecay</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_target</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_cost</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_decay</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates mini-batches and trains the CRBM for the given number of epochs</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_data:         tensor</span>
+<span class="sd">            the input data tensor</span>
+<span class="sd">        cond_data:         tensor</span>
+<span class="sd">            the condition data tensor</span>
+<span class="sd">        training_epochs:    float</span>
+<span class="sd">            the number of training epochs</span>
+<span class="sd">        batch_size:         int</span>
+<span class="sd">            the size of each mini batch</span>
+<span class="sd">        learning_rate:      float, default 0.1</span>
+<span class="sd">            the learning rate</span>
+<span class="sd">        snapshot_dir:       string, default logs</span>
+<span class="sd">            the directory to store model snapshots and logs</span>
+<span class="sd">        snapshot_freq:      int, default 100</span>
+<span class="sd">            the frequency of the epochs to save a model snapshot</span>
+<span class="sd">        cd_k:               int, default 1</span>
+<span class="sd">            the number of CD steps for gibbs sampling</span>
+<span class="sd">        momentum:           float, default 0</span>
+<span class="sd">            the momentum value</span>
+<span class="sd">        wdecay:             float, default 0</span>
+<span class="sd">            the weight decay value</span>
+<span class="sd">        sparse_target:  float, default 0</span>
+<span class="sd">            the sparsity target</span>
+<span class="sd">        sparse_cost:    float, default 0</span>
+<span class="sd">            the sparsity cost</span>
+<span class="sd">        sparse_decay:   float, default 0</span>
+<span class="sd">            the sparsity weight decay</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        W:      array_like</span>
+<span class="sd">            the numpy visble-hidden weight matrix</span>
+<span class="sd">        A:      array_like</span>
+<span class="sd">            the numpy condition to visible weight matrix</span>
+<span class="sd">        B:      array_like</span>
+<span class="sd">            the numpy condition to hidden weight matrix</span>
+<span class="sd">        vbias:      array_like</span>
+<span class="sd">            the numpy visible biases</span>
+<span class="sd">        hbias:      array_like</span>
+<span class="sd">            the numpy hidden biases</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        
+        <span class="c1"># Make batches</span>
+        <span class="n">batch_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_data</span><span class="p">)))</span>
+        <span class="n">n_batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_idxs</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
+        
+        <span class="c1"># Define train ops            </span>
+        <span class="n">train_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">,</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">cond_data</span><span class="p">,</span> 
+                                   <span class="n">learning_rate</span><span class="p">,</span> 
+                                   <span class="n">momentum</span><span class="p">,</span> 
+                                   <span class="n">wdecay</span><span class="p">,</span> 
+                                   <span class="n">cd_k</span><span class="o">=</span><span class="n">cd_k</span><span class="p">,</span>
+                                   <span class="n">sparse_target</span><span class="o">=</span><span class="n">sparse_target</span><span class="p">,</span> 
+                                   <span class="n">sparse_cost</span><span class="o">=</span><span class="n">sparse_cost</span><span class="p">,</span> 
+                                   <span class="n">sparse_decay</span><span class="o">=</span><span class="n">sparse_decay</span><span class="p">)</span>
+        
+        <span class="n">saver</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">Saver</span><span class="p">()</span>
+
+        <span class="c1"># Run everything in tf </span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">training_epochs</span><span class="p">):</span>
+            <span class="n">epoch_cost</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">epoch_h_means</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+            <span class="k">for</span> <span class="n">batch_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_batches</span><span class="p">):</span>
+                <span class="c1"># Get just minibatch amount of data</span>
+                <span class="n">idxs_i</span> <span class="o">=</span> <span class="n">batch_idxs</span><span class="p">[</span><span class="n">batch_i</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">:(</span><span class="n">batch_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">]</span>
+                
+                <span class="c1"># Add noise to the past, Gaussian with std 1</span>
+                <span class="n">cd_noise</span> <span class="o">=</span> <span class="n">cond_data</span><span class="p">[</span><span class="n">idxs_i</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="n">batch_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_cond</span><span class="p">])</span>
+
+                <span class="c1"># Create the feed for the batch data</span>
+                <span class="n">feed</span> <span class="o">=</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">input_data</span><span class="p">:</span> <span class="n">input_data</span><span class="p">[</span><span class="n">idxs_i</span><span class="p">],</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">cond_data</span><span class="p">:</span> <span class="n">cd_noise</span><span class="p">}</span>
+
+                <span class="c1"># Run the training step</span>
+                <span class="p">(</span><span class="n">rec_cost</span><span class="p">,</span> <span class="n">new_params</span><span class="p">,</span> <span class="n">updates</span><span class="p">,</span> <span class="n">h_means</span><span class="p">)</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">train_op</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="n">feed</span><span class="p">)</span>
+
+                <span class="c1"># Add up the cost</span>
+                <span class="n">epoch_cost</span> <span class="o">+=</span> <span class="n">rec_cost</span>
+                <span class="n">epoch_h_means</span> <span class="o">+=</span> <span class="n">h_means</span>
+            
+            <span class="n">epoch_cost</span> <span class="o">=</span> <span class="n">epoch_cost</span><span class="o">/</span><span class="n">n_batches</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Epoch </span><span class="si">%i</span><span class="s1"> / </span><span class="si">%i</span><span class="s1"> | cost = </span><span class="si">%f</span><span class="s1"> | lr = </span><span class="si">%f</span><span class="s1"> | momentum = </span><span class="si">%f</span><span class="s1"> | sparse cost = </span><span class="si">%f</span><span class="s1">&#39;</span><span class="o">%</span>
+                 <span class="p">(</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">training_epochs</span><span class="p">,</span> <span class="n">epoch_cost</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">momentum</span><span class="p">,</span> <span class="n">sparse_cost</span><span class="p">))</span>
+                    
+            <span class="k">if</span> <span class="n">snapshot_freq</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">snapshot_freq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>                
+                <span class="n">save_path</span> <span class="o">=</span> <span class="n">saver</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">sess</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">_ep</span><span class="si">%i</span><span class="s1">_model.ckpt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">snapshot_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">sess</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">sess</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">sess</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">sess</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">sess</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Omid Alemi.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

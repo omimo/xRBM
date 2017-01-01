@@ -13,7 +13,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
-from xrbm.models import rbm
+from xrbm.models.rbm import RBM
 from xrbm.utils.vizutils import tile_raster_images
 
 
@@ -26,7 +26,7 @@ snapshot_dir = './logs/'
 snapshot_freq = 100
 num_vis = training_data[0].shape[0]
 num_hid = 300
-learning_rate=0.01
+learning_rate=0.1
 batch_size=100
 cd_k=5
 wdecay=0.0001
@@ -41,7 +41,7 @@ print('lr: %1.3f, batchsize: %i, cd: %i, wdecay: %f, mom: %1.1f'%(learning_rate,
 print('-'*80)
 
 
-r1 = rbm.RBM(num_vis=num_vis, num_hid=num_hid, vis_type='binary', name='rbm_mnist_simple', activation=activation)
+r1 = RBM(num_vis=num_vis, num_hid=num_hid, vis_type='binary', name='rbm_mnist_simple', activation=activation)
 
 
 with tf.Session() as sess: 
@@ -62,7 +62,7 @@ with tf.Session() as sess:
                 tile_raster_images(
                     X=W.transpose(),
                     img_shape=(28, 28),
-                    tile_shape=(10, 20),
+                    tile_shape=(15, 20),
                     tile_spacing=(1, 1)
                 )
             )

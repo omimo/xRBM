@@ -20,15 +20,15 @@ class RBM(AbstractRBM):
         Parameters
         ----------
         num_vis:       int
-        number of visible input units
+            number of visible input units
         num_hid:       int
-        number of hidden units
+            number of hidden units
         vis_type:      string
-        the type of the visible units (`binary` or `gaussian`)
+            the type of the visible units (`binary` or `gaussian`)
         activation:    callable f(h)
-        a function reference to the activation function of the hidden units
+            a function reference to the activation function of the hidden units
         name:          string
-        the name of the object (used for Tensorflow's scope)
+            the name of the object (used for Tensorflow's scope)
         """
         super(RBM, self).__init__(num_vis, num_hid, vis_type, activation, name)
 
@@ -158,7 +158,7 @@ class RBM(AbstractRBM):
 
     def gibbs_sample_hvh(self, h_samples0):    
         """
-        Defines the operations for a cycle of gibbs sampling, started with an initial hidden units activations
+        Runs a cycle of gibbs sampling, started with an initial hidden units activations
 
         Parameters
         ----------
@@ -187,31 +187,31 @@ class RBM(AbstractRBM):
 
     def inference(self, input_data, cd_k=1, sparse_target=0, sparse_cost=0, sparse_decay=0):
         """
-            Defines the tensorflow operations for inference
+        Defines the tensorflow operations for inference
 
-            Parameters
-            ----------
-            input_data:     tensor
-                the input (batch) data tensor
-            cd_k=1:         int, default 1
-                the number of CD steps for gibbs sampling
-            sparse_target:  float, default 0
-                the sparsity target
-            sparse_cost:    float, default 0
-                the sparsity cost
-            sparse_decay:   float, default 0
-                the sparsity weight decay
+        Parameters
+        ----------
+        input_data:     tensor
+            the input (batch) data tensor
+        cd_k=1:         int, default 1
+            the number of CD steps for gibbs sampling
+        sparse_target:  float, default 0
+            the sparsity target
+        sparse_cost:    float, default 0
+            the sparsity cost
+        sparse_decay:   float, default 0
+            the sparsity weight decay
 
-            Returns
-            -------
-            v_probs_means:  tensor
-                a tensor containing the mean probabilities of the visible units
-            chain_end:      tensor
-                the last visible samples generated in the gibbs cycles
-            sparse_grad:    tensor
-                the sparisity gradients
-            current_activations_mean_props:     tensor
-                the mean activation of the hidden units
+        Returns
+        -------
+        v_probs_means:  tensor
+            a tensor containing the mean probabilities of the visible units
+        chain_end:      tensor
+            the last visible samples generated in the gibbs cycles
+        sparse_grad:    tensor
+            the sparisity gradients
+        current_activations_mean_props:     tensor
+            the mean activation of the hidden units
         """
 
         with tf.variable_scope('inference'):
@@ -227,20 +227,6 @@ class RBM(AbstractRBM):
 
             self.sp_hidden_means = sparse_decay * self.sp_hidden_means + (1 - sparse_decay) * current_activations_mean_props
             sparse_grad = sparse_cost * (self.sp_hidden_means - sparse_target)
-
-            ### negative phase
-            # def gibbs_step(k, chain_data):
-            #     tf.add(k, 1)
-            #     return self.gibbs_sample_hvh(chain_data)
-                
-
-            # # perform k steps of gibbs
-            # k = tf.constant(0)
-            # cond = lambda k: tf.less(k, cd_k)
-            # # b = lambda k: tf.add(k, 1)
-            # # r = tf.while_loop(cond, b, [k])
-
-            # v_probs_means, v_samples, h_probs_means, h_samples = tf.while_loop(cond, gibbs_step, [k, chain_data])
 
             for k in range(cd_k):
                 v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh(chain_data)
@@ -340,7 +326,7 @@ class RBM(AbstractRBM):
 
     def get_reconstruction_cost(self, input_data, recon_means):
         """
-        Calculates the cross-entropy cost between input data and reconstructed data
+        Calculates the reconstruction cost between input data and reconstructed data
     
         Parameters
         ----------
@@ -352,9 +338,10 @@ class RBM(AbstractRBM):
         Returns
         -------
         cost:       float
-            the cross-entroy cost
+            the reconstruction cost
         """        
-        cost = costs.cross_entropy(input_data, recon_means)
+        # cost = costs.cross_entropy(input_data, recon_means)
+        cost = costs.mse(input_data, recon_means)
         return cost
 
     def free_energy(self, v_sample): 
