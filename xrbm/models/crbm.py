@@ -1,5 +1,6 @@
-# Restricted Boltzmann Machines (RBM) Implementation in Tensorflow
-# Created by Omid Alemi
+"""
+CRestricted Boltzmann Machines (CRBM) Implementation in Tensorflow
+"""
 
 import tensorflow as tf
 import numpy as np

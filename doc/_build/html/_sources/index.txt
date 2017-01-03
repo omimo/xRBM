@@ -10,19 +10,35 @@ xRBM Library
    :maxdepth: 2
    :caption: Contents:
 
-   install
+   examples-rbm
+   examples-crbm
+
+* :ref:`sec-install`
+* :ref:`sec-examples`
+
+
+.. _sec-install:
 
 Installation
-============
+------------
 
+You can install xRBM using pip: ::
+
+    pip install git+https://github.com/omimo/xrbm.git
+
+
+You can download the latest source code:
+
+
+You can clone the git repository
     
 
-Examples and Tutorials
-======================
+.. _sec-examples:
+
 
 
 Modules
-=======
+-------
 .. toctree::
    :maxdepth: 4
    
@@ -30,7 +46,7 @@ Modules
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

@@ -3,17 +3,50 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to xRBM Library's documentation!
+xRBM Library
 ========================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   rbm
+   crbm
+
+* :ref:`sec-install`
+* :ref:`sec-examples`
+
+
+.. _sec-install:
+
+Installation
+------------
+
+You can install xRBM using pip: ::
+
+    pip install git+https://github.com/omimo/xrbm.git
+
+
+You can download the latest source code:
+
+
+You can clone the git repository
+    
+
+.. _sec-examples:
+
+
+
+Modules
+-------
+.. toctree::
+   :maxdepth: 4
+   
+   xrbm
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
