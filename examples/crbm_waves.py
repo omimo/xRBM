@@ -19,9 +19,9 @@ from xrbm.utils.vizutils import tile_raster_images
 snapshot_dir = './logs/'
 snapshot_freq = 0
 num_vis = 4
-num_hid = 100
-timesteps = 150
-batch_size=150
+num_hid = 80
+timesteps = 100
+batch_size=250
 cd_k=25
 wdecay=0.0002
 activation=tf.nn.sigmoid
@@ -30,8 +30,8 @@ vis_type='gaussian'
 
 # Create some toy sequences with sin waves
 
-FREQS = [0.1, 0.5, 0.7, 1.2]
-AMPS = [2, 1, 0.5, 1.5]
+FREQS = [0.4, 0.5, 0.7, 1.2]
+AMPS = [3, 1, 0.4, 1.5]
 NSAMPLE = 60
 SEQ_LEN = 600
 
@@ -126,7 +126,7 @@ print('-'*80)
 W, A, B, vb, hb = c1.train(sess,
          input_data=visible_data,
          cond_data=cond_data,
-         training_epochs=80,
+         training_epochs=100,
          learning_rate=learning_rate,
          batch_size=batch_size,
          cd_k=cd_k,

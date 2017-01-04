@@ -1,6 +1,8 @@
 Restricted Boltzmann Machine (RBM)
 ==================================
 
+Overview
+--------
 
 Examples
 --------
@@ -36,3 +38,7 @@ A simplpe example on how to use xRBM to train an RBM on image data: ::
 
 Step-by-step RBM Training
 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+References
+----------
