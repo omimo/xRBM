@@ -10,8 +10,8 @@ xRBM Library
    :maxdepth: 2
    :caption: Contents:
 
-   examples-rbm
-   examples-crbm
+   rbm
+   crbm
 
 * :ref:`sec-install`
 * :ref:`sec-examples`

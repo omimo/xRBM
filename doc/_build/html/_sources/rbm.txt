@@ -6,7 +6,7 @@ Overview
 Restricted Boltzmann Machine (RBM) is a type of energy-based, generative, stochastic artificial nerual network. 
 It is energy-based beacuse it associates a scalar value to each state of the model. The learning then can be defined 
 as finding an energy function that assigned the desired configurations a low-energy value. 
-RBM is generative beacuse it learns a probability distribution that fits the training data as well as possible.
+RBM is generative beacuse it learns a probabilistic model of all of the variables.
 It is a stochastic network beacuse its units use a stochastic activation function, which work by introducing noise to the data.
 RBM was introduced by Paul Smolensky in 1986, but was later become widely used after Geoffrey Hinton and his team 
 introduced sucsseful applications of RBM.  

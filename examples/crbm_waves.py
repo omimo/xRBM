@@ -22,7 +22,7 @@ num_vis = 4
 num_hid = 80
 timesteps = 100
 batch_size=250
-cd_k=25
+cd_k=1
 wdecay=0.0002
 activation=tf.nn.sigmoid
 vis_type='gaussian'
@@ -52,7 +52,7 @@ X_data_flat = np.concatenate([m for m in X_data], axis=0)
 data_mean = np.mean(X_data_flat, axis=0)
 data_std = np.std(X_data_flat, axis=0)
 
-X_data_normalized = data_norm = [(d - data_mean) / data_std for d in X_data]
+X_data_normalized = [(d - data_mean) / data_std for d in X_data]
 
 def makeSeqHistory(seqs, order, step=1):
     history = []
@@ -65,6 +65,7 @@ def makeSeqHistory(seqs, order, step=1):
     return np.asarray(history), np.asarray(outputs)
 
 
+# cond_data, visible_data = makeSeqHistory(X_data, timesteps)
 cond_data, visible_data = makeSeqHistory(X_data_normalized, timesteps)
 
 num_cond = cond_data[0].shape[0]

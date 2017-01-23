@@ -30,9 +30,6 @@
   
 
   
-        <link rel="index" title="Index"
-              href="../../../genindex.html"/>
-        <link rel="search" title="Search" href="../../../search.html"/>
     <link rel="top" title="xRBM Library 0.1.0 documentation" href="../../../index.html"/>
         <link rel="up" title="Module code" href="../../index.html"/> 
 
@@ -139,9 +136,9 @@
 <span class="c1"># Restricted Boltzmann Machines (RBM) in Tensorflow</span>
 <span class="c1"># Created by Omid Alemi</span>
 
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">xrbm.utils</span> <span class="k">import</span> <span class="n">tfutils</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">xrbm.utils</span> <span class="kn">import</span> <span class="n">tfutils</span>
 
 <div class="viewcode-block" id="AbstractRBM"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.abstract_model.AbstractRBM">[docs]</a><span class="k">class</span> <span class="nc">AbstractRBM</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="s1">&#39;Abstract Class for xRBM Models&#39;</span>
@@ -157,23 +154,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">activation</span>
 
         <span class="c1"># Training        </span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sp_hidden_means</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sp_hidden_means</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="c1"># Data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_mean</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_std</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">gsd</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_data</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_mean</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_std</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gsd</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="c1"># Weights</span>
 
         <span class="c1"># Biases</span>
 
         <span class="c1"># Learning params</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="c1"># tf stuff</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sess</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sess</span> <span class="o">=</span> <span class="bp">None</span>
 
 <div class="viewcode-block" id="AbstractRBM.restore_model"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.abstract_model.AbstractRBM.restore_model">[docs]</a>    <span class="k">def</span> <span class="nf">restore_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sess</span><span class="p">,</span> <span class="n">checkpoint_file</span><span class="p">):</span>
 
@@ -181,7 +178,7 @@
 
         <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">initialize_all_variables</span><span class="p">())</span>
         <span class="n">saver</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">sess</span><span class="p">,</span> <span class="n">checkpoint_file</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Model restored.&quot;</span><span class="p">)</span></div></div>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Model restored.&quot;</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

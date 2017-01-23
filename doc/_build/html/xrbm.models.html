@@ -30,9 +30,6 @@
   
 
   
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="xRBM Library 0.1.0 documentation" href="index.html"/>
         <link rel="up" title="xrbm package" href="xrbm.html"/>
         <link rel="next" title="xrbm.utils package" href="xrbm.utils.html"/>
@@ -143,7 +140,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/xrbm.models.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/xrbm.models.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -355,10 +352,10 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>input_data</strong> (<em>tensor</em>) &#8211; the input (batch) data tensor</li>
 <li><strong>cond_data</strong> (<em>tensor</em>) &#8211; the condition data tensor</li>
-<li><strong>cd_k=1</strong> (<em>int</em><em>, </em><em>default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>sparse_target</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity weight decay</li>
+<li><strong>cd_k=1</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
+<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
+<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
+<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
 </ul>
 </td>
 </tr>
@@ -386,7 +383,7 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>cond</strong> (<em>tensor</em>) &#8211; the condition units tensor</li>
 <li><strong>init</strong> (<em>tensor</em>) &#8211; the configuation to initialize the visible units with</li>
-<li><strong>num_gibbs</strong> (<em>int</em><em>, </em><em>default 20</em>) &#8211; the number of gibbs sampling cycles</li>
+<li><strong>num_gibbs</strong> (<em>int, default 20</em>) &#8211; the number of gibbs sampling cycles</li>
 </ul>
 </td>
 </tr>
@@ -466,15 +463,15 @@
 <li><strong>cond_data</strong> (<em>tensor</em>) &#8211; the condition data tensor</li>
 <li><strong>training_epochs</strong> (<em>float</em>) &#8211; the number of training epochs</li>
 <li><strong>batch_size</strong> (<em>int</em>) &#8211; the size of each mini batch</li>
-<li><strong>learning_rate</strong> (<em>float</em><em>, </em><em>default 0.1</em>) &#8211; the learning rate</li>
-<li><strong>snapshot_dir</strong> (<em>string</em><em>, </em><em>default logs</em>) &#8211; the directory to store model snapshots and logs</li>
-<li><strong>snapshot_freq</strong> (<em>int</em><em>, </em><em>default 100</em>) &#8211; the frequency of the epochs to save a model snapshot</li>
-<li><strong>cd_k</strong> (<em>int</em><em>, </em><em>default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>momentum</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the momentum value</li>
-<li><strong>wdecay</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the weight decay value</li>
-<li><strong>sparse_target</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity weight decay</li>
+<li><strong>learning_rate</strong> (<em>float, default 0.1</em>) &#8211; the learning rate</li>
+<li><strong>snapshot_dir</strong> (<em>string, default logs</em>) &#8211; the directory to store model snapshots and logs</li>
+<li><strong>snapshot_freq</strong> (<em>int, default 100</em>) &#8211; the frequency of the epochs to save a model snapshot</li>
+<li><strong>cd_k</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
+<li><strong>momentum</strong> (<em>float, default 0</em>) &#8211; the momentum value</li>
+<li><strong>wdecay</strong> (<em>float, default 0</em>) &#8211; the weight decay value</li>
+<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
+<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
+<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
 </ul>
 </td>
 </tr>
@@ -504,12 +501,12 @@
 <li><strong>visible_data</strong> (<em>tensor</em>) &#8211; the input (batch) data tensor</li>
 <li><strong>cond_data</strong> (<em>tensor</em>) &#8211; the condition data tensor</li>
 <li><strong>learning_rate</strong> (<em>float</em>) &#8211; the learning rate</li>
-<li><strong>momentum</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the momentum value</li>
-<li><strong>wdecay</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the weight decay value</li>
-<li><strong>cd_k</strong> (<em>int</em><em>, </em><em>default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>sparse_target</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity weight decay</li>
+<li><strong>momentum</strong> (<em>float, default 0</em>) &#8211; the momentum value</li>
+<li><strong>wdecay</strong> (<em>float, default 0</em>) &#8211; the weight decay value</li>
+<li><strong>cd_k</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
+<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
+<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
+<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
 </ul>
 </td>
 </tr>
@@ -640,10 +637,10 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>input_data</strong> (<em>tensor</em>) &#8211; the input (batch) data tensor</li>
-<li><strong>cd_k=1</strong> (<em>int</em><em>, </em><em>default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>sparse_target</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity weight decay</li>
+<li><strong>cd_k=1</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
+<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
+<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
+<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
 </ul>
 </td>
 </tr>
@@ -733,15 +730,15 @@
 <li><strong>input_data</strong> (<em>tensor</em>) &#8211; the input data tensor</li>
 <li><strong>training_epochs</strong> (<em>float</em>) &#8211; the number of training epochs</li>
 <li><strong>batch_size</strong> (<em>int</em>) &#8211; the size of each mini batch</li>
-<li><strong>learning_rate</strong> (<em>float</em><em>, </em><em>default 0.1</em>) &#8211; the learning rate</li>
-<li><strong>snapshot_dir</strong> (<em>string</em><em>, </em><em>default logs</em>) &#8211; the directory to store model snapshots and logs</li>
-<li><strong>snapshot_freq</strong> (<em>int</em><em>, </em><em>default 100</em>) &#8211; the frequency of the epochs to save a model snapshot</li>
-<li><strong>cd_k</strong> (<em>int</em><em>, </em><em>default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>momentum</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the momentum value</li>
-<li><strong>wdecay</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the weight decay value</li>
-<li><strong>sparse_target</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity weight decay</li>
+<li><strong>learning_rate</strong> (<em>float, default 0.1</em>) &#8211; the learning rate</li>
+<li><strong>snapshot_dir</strong> (<em>string, default logs</em>) &#8211; the directory to store model snapshots and logs</li>
+<li><strong>snapshot_freq</strong> (<em>int, default 100</em>) &#8211; the frequency of the epochs to save a model snapshot</li>
+<li><strong>cd_k</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
+<li><strong>momentum</strong> (<em>float, default 0</em>) &#8211; the momentum value</li>
+<li><strong>wdecay</strong> (<em>float, default 0</em>) &#8211; the weight decay value</li>
+<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
+<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
+<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
 </ul>
 </td>
 </tr>
@@ -768,12 +765,12 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>visible_data</strong> (<em>tensor</em>) &#8211; the input (batch) data tensor</li>
 <li><strong>learning_rate</strong> (<em>float</em>) &#8211; the learning rate</li>
-<li><strong>momentum</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the momentum value</li>
-<li><strong>wdecay</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the weight decay value</li>
-<li><strong>cd_k</strong> (<em>int</em><em>, </em><em>default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>sparse_target</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float</em><em>, </em><em>default 0</em>) &#8211; the sparsity weight decay</li>
+<li><strong>momentum</strong> (<em>float, default 0</em>) &#8211; the momentum value</li>
+<li><strong>wdecay</strong> (<em>float, default 0</em>) &#8211; the weight decay value</li>
+<li><strong>cd_k</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
+<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
+<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
+<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
 </ul>
 </td>
 </tr>

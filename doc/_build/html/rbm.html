@@ -30,9 +30,6 @@
   
 
   
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="xRBM Library 0.1.0 documentation" href="index.html"/>
         <link rel="next" title="Conditional Restricted Boltzmann Machine (CRBM)" href="crbm.html"/>
         <link rel="prev" title="xRBM Library" href="index.html"/> 
@@ -87,11 +84,16 @@
                 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Restricted Boltzmann Machine (RBM)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#simple-rbm-training">Simple RBM Training</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#step-by-step-rbm-training">Step-by-step RBM Training</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#api">API</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="crbm.html">Conditional Restricted Boltzmann Machine (CRBM)</a></li>
@@ -132,7 +134,7 @@
       <li class="wy-breadcrumbs-aside">
         
           
-            <a href="_sources/rbm.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/rbm.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -144,6 +146,17 @@
             
   <div class="section" id="restricted-boltzmann-machine-rbm">
 <h1>Restricted Boltzmann Machine (RBM)<a class="headerlink" href="#restricted-boltzmann-machine-rbm" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>Restricted Boltzmann Machine (RBM) is a type of energy-based, generative, stochastic artificial nerual network.
+It is energy-based beacuse it associates a scalar value to each state of the model. The learning then can be defined
+as finding an energy function that assigned the desired configurations a low-energy value.
+RBM is generative beacuse it learns a probabilistic model of all of the variables.
+It is a stochastic network beacuse its units use a stochastic activation function, which work by introducing noise to the data.
+RBM was introduced by Paul Smolensky in 1986, but was later become widely used after Geoffrey Hinton and his team
+introduced sucsseful applications of RBM.</p>
+<p>Each RBM consists of two groups of units: <em>visible</em> and <em>hidden</em>.</p>
+</div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="simple-rbm-training">
@@ -177,6 +190,16 @@
 <div class="section" id="step-by-step-rbm-training">
 <h3>Step-by-step RBM Training<a class="headerlink" href="#step-by-step-rbm-training" title="Permalink to this headline">¶</a></h3>
 </div>
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
