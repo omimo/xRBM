@@ -2,11 +2,13 @@ import tensorflow as tf
 import numpy as np
 
 def weight_variable(shape, name='weight'):
-    # initial = tf.truncated_normal(shape, stddev=0.1) #TODO: right choice?
+    initial = tf.truncated_normal(shape, stddev=0.1) #TODO: right choice?
     # return tf.Variable(initial, name=name)
     return tf.get_variable(name=name, shape=shape,
-                           initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.0005)) 
-                        #    initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.001 * np.sqrt(6. / (shape[0] + shape[1]))))
+                        #    initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1) 
+                           initializer=tf.truncated_normal_initializer(mean=0.0, stddev=4 * np.sqrt(6. / (shape[0] + shape[1])))
+                        #    initializer = initial
+                           )
 
 def bias_variable(shape, name='bias', initializer=tf.constant_initializer(0.0)):  
     # initial = tf.constant(0.1, shape=shape)
