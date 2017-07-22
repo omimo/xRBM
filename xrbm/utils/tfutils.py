@@ -23,7 +23,7 @@ def sample_bernoulli(means, n=-1):
     if n==-1:
         n = means.get_shape().as_list()[0]
     shape = [n , means.get_shape().as_list()[1]] #[n, means.get_shape()[1]]
-    return tf.select(means - tf.random_uniform(shape) > 0, 
+    return tf.where(means - tf.random_uniform(shape) > 0, 
                                   tf.ones(shape), 
                                   tf.zeros(shape))
 

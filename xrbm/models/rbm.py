@@ -13,7 +13,9 @@ class RBM(AbstractRBM):
     'Restricted Boltzmann Machines (RBM)'
 
     def __init__(self, num_vis, num_hid, vis_type='binary',
-                 activation=tf.nn.sigmoid,  name='RBM'):
+                 activation=tf.nn.sigmoid,  
+                 initializer=tf.contrib.layers.variance_scaling_initializer(), # He Init
+                 name='RBM'):
         """
         The RBM Constructor
 
@@ -30,7 +32,10 @@ class RBM(AbstractRBM):
         name:          string
             the name of the object (used for Tensorflow's scope)
         """
-        super(RBM, self).__init__(num_vis, num_hid, vis_type, activation, name)
+        super(RBM, self).__init__(num_vis, num_hid, vis_type, 
+                                  activation=activation, 
+                                  initializer=initializer, 
+                                  name=name)
 
         # Weights
         self.W = None
@@ -60,7 +65,10 @@ class RBM(AbstractRBM):
             self.batch_data = tfutils.data_variable((None, self.num_vis),'batch_data')
 
         with tf.variable_scope('params'):
-            self.W = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
+            self.W = tf.get_variable(shape=[self.num_vis, self.num_hid], 
+                                     initializer=self.initializer,
+                                     name='main_weights')
+            #self.W = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
             self.vbias = tfutils.bias_variable([self.num_vis], 'vbias')
             self.hbias = tfutils.bias_variable([self.num_hid], 'hbias')
 

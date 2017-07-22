@@ -10,7 +10,9 @@ class AbstractRBM(object):
     'Abstract Class for xRBM Models'
 
     def __init__(self, num_vis, num_hid, vis_type='binary',
-                 activation=tf.nn.sigmoid,  name='xRBM'):
+                 activation=tf.nn.sigmoid,
+                 initializer=tf.contrib.layers.variance_scaling_initializer(), # He Init
+                 name='xRBM'):
 
         # Model Params
         self.num_vis = num_vis
@@ -18,6 +20,7 @@ class AbstractRBM(object):
         self.vis_type = vis_type
         self.name = name
         self.activation = activation
+        self.initializer = initializer
 
         # Training        
         self.sp_hidden_means = None
