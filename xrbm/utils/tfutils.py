@@ -10,10 +10,10 @@ def weight_variable(shape, name='weight'):
                         #    initializer = initial
                            )
 
-def bias_variable(shape, name='bias', initializer=tf.constant_initializer(0.0)):  
+def bias_variable(shape, name='bias', initializer=None):  
     # initial = tf.constant(0.1, shape=shape)
     # return tf.Variable(initial, name=name)
-    return tf.get_variable(name=name, shape=shape, initializer=initializer)
+    return tf.get_variable(name=name, shape=shape)
 
 def data_variable(shape, name='input_data'):
     return tf.placeholder(tf.float32, shape=shape, name=name)

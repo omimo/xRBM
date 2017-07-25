@@ -106,7 +106,7 @@ class CRBM(AbstractRBM):
             self.bu = tfutils.weight_variable([self.num_cond, self.num_hid], 'c2h_weights')
 
             self.vbu = tfutils.bias_variable([self.num_vis], 'vbias', initializer=tf.constant_initializer(0.0))
-            self.hbu = tfutils.bias_variable([self.num_hid], 'hbias', initializer=tf.constant_initializer(-0.1))           
+            self.hbu = tfutils.bias_variable([self.num_hid], 'hbias')           
 
 
     def sample_h_from_vc(self, visible, cond, n=-1): 
