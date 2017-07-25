@@ -193,6 +193,37 @@ class RBM(AbstractRBM):
 
         return v_probs_means, v_samples, h_probs_means, h_samples
 
+    def gibbs_sample_vhv(self, v_samples0):    
+        """
+        Runs a cycle of gibbs sampling, started with an initial hidden units activations
+
+        Parameters
+        ----------
+        v_samples0:    tensor
+            a tensor of visible units values
+        
+        Returns
+        -------
+        v_probs_means:  tensor
+
+        v_samples:      tensor
+            visible samples
+        h_probs_means:  tensor
+            a tensor containing the mean probabilities of the hidden units activations
+        h_samples:      tensor
+            a tensor containing a bernoulli sample generated from the mean activations
+        """
+        with tf.variable_scope('sampling_vhv'):
+            # h from v
+            bottom_up, h_probs_means, h_samples = self.sample_h_from_v(v_samples0, n=self.batch_size)
+
+            # v from h
+            top_bottom, v_probs_means, v_samples = self.sample_v_from_h(h_samples, n=self.batch_size)
+
+
+
+        return v_probs_means, v_samples, h_probs_means, h_samples
+
     def inference(self, input_data, cd_k=1, sparse_target=0, sparse_cost=0, sparse_decay=0):
         """
         Defines the tensorflow operations for inference
@@ -281,8 +312,11 @@ class RBM(AbstractRBM):
         """
         with tf.variable_scope('train_step'):
             ## inference
-            chain_end_probs_means, chain_end, sparse_grad, current_activations_mean_props = self.inference(visible_data, cd_k,
-                                                        sparse_target, sparse_cost, sparse_decay)
+            chain_end_probs_means, chain_end, sparse_grad, current_activations_mean_props = self.inference(visible_data, 
+                                                            cd_k,
+                                                            sparse_target, 
+                                                            sparse_cost, 
+                                                            sparse_decay)
 
             ## update
              # get the cost using free energy
@@ -292,24 +326,26 @@ class RBM(AbstractRBM):
             grad_params = tf.gradients(ys=cost, xs=self.model_params)
 
              # compose the update values, incorporating weight decay, momentum, and sparsity terms
-            wu_ = self.wu.assign(momentum * self.wu + (grad_params[0] + sparse_grad - wdecay * self.W) * learning_rate)
-            vbu_ = self.vbu.assign(momentum * self.vbu + grad_params[1] * learning_rate)
-            hbu_ = self.hbu.assign(momentum * self.hbu + (grad_params[2] + sparse_grad) * learning_rate)
+            wu_ = tf.assign(self.wu, momentum * self.wu + (grad_params[0] + sparse_grad - wdecay * self.W) * learning_rate)
+            vbu_ = tf.assign(self.vbu, momentum * self.vbu + grad_params[1] * learning_rate)
+            hbu_ = tf.assign(self.hbu, momentum * self.hbu + (grad_params[2] + sparse_grad) * learning_rate)
 
-            updates = [wu_, vbu_, hbu_]
+            momentum_ops = [wu_, 
+                            vbu_, 
+                            hbu_]
 
-             # update the parameters
-            w_ = self.W.assign_sub(self.wu)
-            vb_ = self.vbias.assign_sub(self.vbu)
-            hb_ = self.hbias.assign_sub(self.hbu)
+             # ops to update the parameters
+            update_ops = [tf.assign_sub(self.W, self.wu), 
+                          tf.assign_sub(self.vbias, self.vbu), 
+                          tf.assign_sub(self.hbias, self.hbu)]
 
              # we need to return the new params so that tf considers them in the graph
-            new_params = [w_, vb_, hb_]
+
 
             ## evaluate the reconstruction capability of the model
-            rec_cost = self.get_reconstruction_cost(visible_data, chain_end_probs_means)
+            #rec_cost = self.get_reconstruction_cost(visible_data, chain_end_probs_means)
 
-        return rec_cost, new_params, updates, current_activations_mean_props #TODO: Remove
+        return [momentum_ops, update_ops]
 
     def get_cost(self, v_sample, chain_end):
         """
@@ -332,7 +368,7 @@ class RBM(AbstractRBM):
                     - self.free_energy(chain_end), reduction_indices=0)
         return cost
 
-    def get_reconstruction_cost(self, input_data, recon_means):
+    def get_reconstruction_cost(self, input_data):
         """
         Calculates the reconstruction cost between input data and reconstructed data
     
@@ -348,10 +384,13 @@ class RBM(AbstractRBM):
         cost:       float
             the reconstruction cost
         """        
+        recon_means,_,_,_ = self.gibbs_sample_vhv(input_data)
+
         # cost = costs.cross_entropy(input_data, recon_means)
         cost = costs.mse(input_data, recon_means)
         return cost
-
+    
+    
     def free_energy(self, v_sample): 
         """
         Calcuates the free-energy of a given visible tensor
@@ -451,11 +490,14 @@ class RBM(AbstractRBM):
                 feed = feed_dict={self.batch_data: input_data[idxs_i]}
 
                 # Run the training step
-                (rec_cost, new_params, updates, h_means) = sess.run(train_op, feed_dict=feed)
+                sess.run(train_op, feed_dict=feed)
+                
+                # Get the cost
+                
 
                 # Add up the cost
                 epoch_cost += rec_cost
-                epoch_h_means += h_means
+                # epoch_h_means += h_means
             
             epoch_cost = epoch_cost/n_batches
             print('Epoch %i / %i | cost = %f | lr = %f | momentum = %f | sparse cost = %f'%
