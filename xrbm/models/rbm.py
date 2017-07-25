@@ -15,6 +15,7 @@ class RBM(AbstractRBM):
     def __init__(self, num_vis, num_hid, vis_type='binary',
                  activation=tf.nn.sigmoid,  
                  initializer=tf.contrib.layers.variance_scaling_initializer(), # He Init
+                 W_regularizer=None,
                  name='RBM'):
         """
         The RBM Constructor
@@ -49,6 +50,9 @@ class RBM(AbstractRBM):
         self.wu = None
         self.vbu = None
         self.hbu = None
+
+        # Regularizer
+        self.W_regularizer = W_regularizer
 
         with tf.variable_scope(self.name):
             self.create_placeholders_variables()
@@ -321,6 +325,9 @@ class RBM(AbstractRBM):
             ## update
              # get the cost using free energy
             cost = self.get_cost(visible_data, chain_end)
+            
+            if self.W_regularizer is not None:
+                cost = cost + self.W_regularizer(self.W)
 
              # calculate the gradients using tf
             grad_params = tf.gradients(ys=cost, xs=self.model_params)
