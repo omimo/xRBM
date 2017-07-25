@@ -15,6 +15,9 @@ class CRBM(AbstractRBM):
     def __init__(self, num_vis, num_cond, num_hid, vis_type='binary',
                  activation=tf.nn.sigmoid,  
                  initializer=tf.contrib.layers.variance_scaling_initializer(), # He Init
+                 W_regularizer=None,
+                 A_regularizer=None,
+                 B_regularizer=None,
                  name='CRBM'):
         """
         The CRBM Constructor
@@ -55,6 +58,11 @@ class CRBM(AbstractRBM):
         self.bu = None
         self.vbu = None
         self.hbu = None
+
+        # Regularizer
+        self.W_regularizer = W_regularizer
+        self.A_regularizer = A_regularizer
+        self.B_regularizer = B_regularizer
 
         with tf.variable_scope(self.name):
             self.create_placeholders_variables()
@@ -172,7 +180,7 @@ class CRBM(AbstractRBM):
 
         return contributions, v_probs_means, v_samples
 
-    def gibbs_sample_hvh(self, h_samples0, cond, n):
+    def gibbs_sample_hvh(self, h_samples0, cond):
         """
         Runs a cycle of gibbs sampling, started with an initial hidden units activations
 
@@ -199,10 +207,10 @@ class CRBM(AbstractRBM):
         """       
         with tf.variable_scope('sampling_hvh'):
             # v from h
-            top_bottom, v_probs_means, v_samples = self.sample_v_from_hc(h_samples0, cond, n)
+            top_bottom, v_probs_means, v_samples = self.sample_v_from_hc(h_samples0, cond)
 
             # h from v
-            bottom_up, h_probs_means, h_samples = self.sample_h_from_vc(v_samples, cond, n)
+            bottom_up, h_probs_means, h_samples = self.sample_h_from_vc(v_samples, cond)
 
         return v_probs_means, v_samples, h_probs_means, h_samples
 
@@ -284,14 +292,14 @@ class CRBM(AbstractRBM):
         """        
         with tf.variable_scope('sampling_vhv'):
             # h from v
-            bottom_up, h_probs_means, h_samples = self.sample_h_from_vc(v_samples0, cond, n)
+            bottom_up, h_probs_means, h_samples = self.sample_h_from_vc(v_samples0, cond)
 
             # v from h
-            top_bottom, v_probs_means, v_samples = self.sample_v_from_hc(h_samples, cond, n)
+            top_bottom, v_probs_means, v_samples = self.sample_v_from_hc(h_samples, cond)
 
         return v_probs_means, v_samples, h_probs_means, h_samples
 
-    def inference(self, input_data, cond_data, cd_k=1, sparse_target=0, sparse_cost=0, sparse_decay=0):
+    def inference(self, input_data, cond_data, cd_k=1):
         """
         Defines the tensorflow operations for inference
 
@@ -303,12 +311,6 @@ class CRBM(AbstractRBM):
             the condition data tensor
         cd_k=1:         int, default 1
             the number of CD steps for gibbs sampling
-        sparse_target:  float, default 0
-            the sparsity target
-        sparse_cost:    float, default 0
-            the sparsity cost
-        sparse_decay:   float, default 0
-            the sparsity weight decay
 
         Returns
         -------
@@ -316,48 +318,39 @@ class CRBM(AbstractRBM):
             a tensor containing the mean probabilities of the visible units
         chain_end:      tensor
             the last visible samples generated in the gibbs cycles
-        sparse_grad:    tensor
-            the sparisity gradients
-        current_activations_mean_props:     tensor
-            the mean activation of the hidden units
         """
 
         with tf.variable_scope('inference'):
             ### positive phase
             # bottom-up - initialze the network with training data
             
-            _, h_probs_means1, h_samples1 = self.sample_h_from_vc(input_data, cond=cond_data, n=self.batch_size)
+            _, h_probs_means1, h_samples1 = self.sample_h_from_vc(input_data, cond=cond_data)
 
             chain_data = h_samples1
 
-            # calculate the sparsity term
-            current_activations_mean_props = tf.reduce_mean(h_probs_means1, reduction_indices=0)
-
-            self.sp_hidden_means = sparse_decay * current_activations_mean_props + (1 - sparse_decay) * self.sp_hidden_means
-            sparse_grad = sparse_cost * (sparse_target - self.sp_hidden_means)
-            
-            current_activations_mean_props = h_probs_means1
-            sparse_grad = 0
 
             # v_samples = tf.stop_gradient(v_samples)
 
-            condcontA = tf.matmul(cond_data, self.A)
-            condcontB = tf.matmul(cond_data, self.B)
+#            condcontA = tf.matmul(cond_data, self.A)
+#            condcontB = tf.matmul(cond_data, self.B)
             for k in range(cd_k): #TODO: this has to be more efficient since cond_data does not change
-                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh_condcont(chain_data, 
-                                                            condcontA,
-                                                            condcontB,
-                                                            self.batch_size)
+#                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh_condcont(chain_data, 
+#                                                            condcontA,
+#                                                            condcontB,
+#                                                            self.batch_size)
+
+                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh(chain_data, 
+                                                            cond_data)
+
                 chain_data = h_samples
 
             ### update
             chain_end = v_samples
 
-        return v_probs_means, chain_end, sparse_grad, current_activations_mean_props
+        return v_probs_means, chain_end
 
     def train_step(self, visible_data, cond_data, learning_rate,
-                   momentum=0, wdecay=0, cd_k=1,
-                   sparse_target=0, sparse_cost=0, sparse_decay=0):
+                   momentum=0, wdecay=0, cd_k=1):
         """
         Defines the operations needed for a training step of a CRBM
 
@@ -375,12 +368,6 @@ class CRBM(AbstractRBM):
             the weight decay value
         cd_k:               int, default 1
             the number of CD steps for gibbs sampling
-        sparse_target:  float, default 0
-            the sparsity target
-        sparse_cost:    float, default 0
-            the sparsity cost
-        sparse_decay:   float, default 0
-            the sparsity weight decay
 
         Returns
         -------
@@ -397,42 +384,43 @@ class CRBM(AbstractRBM):
 
         with tf.variable_scope('train_step'):
             ## inference
-            (chain_end_probs_means, 
-            chain_end, 
-            sparse_grad, 
-            current_activations_mean_props) = self.inference(visible_data, cond_data, 
-                                                             cd_k, sparse_target, sparse_cost, sparse_decay)
+            chain_end_probs_means, chain_end = self.inference(visible_data, cond_data, cd_k)
 
             ## update
              # get the cost using free energy
             cost = self.get_cost(visible_data, cond_data, chain_end)
 
+            # regularize
+            if self.W_regularizer is not None:
+                cost = cost + self.W_regularizer(self.W)
+
+            if self.A_regularizer is not None:
+                cost = cost + self.A_regularizer(self.A)
+
+            if self.B_regularizer is not None:
+                cost = cost + self.B_regularizer(self.B)
+
              # calculate the gradients using tf
             grad_params = tf.gradients(ys=cost, xs=self.model_params)
 
              # compose the update values, incorporating weight decay, momentum, and sparsity terms
-            wu_ = self.wu.assign(momentum * self.wu - (grad_params[0] - sparse_grad - wdecay * self.W) * learning_rateW)
-            au_ = self.au.assign(momentum * self.au - (grad_params[1] - wdecay * self.A) * learning_rateA)
-            bu_ = self.bu.assign(momentum * self.bu - (grad_params[2] - wdecay * self.B) * learning_rateB)
-            vbu_ = self.vbu.assign(momentum * self.vbu - grad_params[3] * learning_rate)
-            hbu_ = self.hbu.assign(momentum * self.hbu - (grad_params[4] - sparse_grad) * learning_rate)
+            wu_ = tf.assign(self.wu, momentum * self.wu + (grad_params[0] - wdecay * self.W) * learning_rateW)
+            au_ = tf.assign(self.au, momentum * self.au + (grad_params[1] - wdecay * self.A) * learning_rateA)
+            bu_ = tf.assign(self.bu, momentum * self.bu + (grad_params[2] - wdecay * self.B) * learning_rateB)
+            vbu_ = tf.assign(self.vbu, momentum * self.vbu + grad_params[3] * learning_rate)
+            hbu_ = tf.assign(self.hbu, momentum * self.hbu + grad_params[4] * learning_rate)
 
-            updates = [wu_, au_, bu_, vbu_, hbu_]
+            momentum_ops = [wu_, au_, bu_, vbu_, hbu_]
 
              # ops to update the parameters
-            w_ = self.W.assign_add(self.wu)
-            a_ = self.A.assign_add(self.au)
-            b_ = self.B.assign_add(self.bu)
-            vb_ = self.vbias.assign_add(self.vbu)
-            hb_ = self.hbias.assign_add(self.hbu)
+            update_ops = [tf.assign_sub(self.W, self.wu),
+                          tf.assign_sub(self.A, self.au),
+                          tf.assign_sub(self.B, self.bu),
+                          tf.assign_sub(self.vbias, self.vbu),
+                          tf.assign_sub(self.hbias, self.hbu)]
 
-             # we need to return the new params so that tf considers them in the graph
-            new_params_ops = [w_, a_, b_, vb_, hb_]
 
-            ## evaluate the reconstruction capability of the model
-            rec_cost = self.get_reconstruction_cost(visible_data, chain_end_probs_means)
-
-        return rec_cost, new_params_ops, updates, current_activations_mean_props #TODO: Remove
+        return [momentum_ops, update_ops]
 
     def get_cost(self, v_sample, cond, chain_end):
         """
@@ -458,7 +446,7 @@ class CRBM(AbstractRBM):
                     - self.free_energy(chain_end, cond), reduction_indices=0)
         return cost
 
-    def get_reconstruction_cost(self, input_data, recon_means):
+    def get_reconstruction_cost(self, input_data, cond_data):
         """
         Calculates the reconstruction cost between input data and reconstructed data
     
@@ -474,8 +462,10 @@ class CRBM(AbstractRBM):
         cost:       float
             the reconstruction cost
         """
-        cost = costs.cross_entropy(input_data, recon_means)
-        # cost = costs.mse(input_data, recon_means)
+        recon_means,_,_,_ = self.gibbs_sample_vhv(input_data, cond_data, tf.shape(input_data)[0])
+
+        #cost = costs.cross_entropy(input_data, recon_means)
+        cost = costs.mse(input_data, recon_means)
         return cost
 
     def free_energy(self, v_sample, cond):  #TODO: change     
@@ -544,7 +534,7 @@ class CRBM(AbstractRBM):
 
     def train(self, sess, input_data, cond_data, training_epochs, batch_size=100, learning_rate=0.1,
                     snapshot_dir='./logs/', snapshot_freq=0, cd_k=1,
-                    momentum=0, wdecay=0, sparse_target=0, sparse_cost=0, sparse_decay=0):
+                    momentum=0, wdecay=0):
         """
         Creates mini-batches and trains the CRBM for the given number of epochs
 
@@ -570,12 +560,6 @@ class CRBM(AbstractRBM):
             the momentum value
         wdecay:             float, default 0
             the weight decay value
-        sparse_target:  float, default 0
-            the sparsity target
-        sparse_cost:    float, default 0
-            the sparsity cost
-        sparse_decay:   float, default 0
-            the sparsity weight decay
 
         Returns
         -------
@@ -603,17 +587,15 @@ class CRBM(AbstractRBM):
                                    learning_rate, 
                                    momentum, 
                                    wdecay, 
-                                   cd_k=cd_k,
-                                   sparse_target=sparse_target, 
-                                   sparse_cost=sparse_cost, 
-                                   sparse_decay=sparse_decay)
+                                   cd_k=cd_k)
         
+        reccost_op = self.get_reconstruction_cost(self.input_data, self.cond_data)
+
         saver = tf.train.Saver()
 
         # Run everything in tf 
         for epoch in range(training_epochs):
             epoch_cost = 0
-            epoch_h_means = 0;
 
             for batch_i in range(n_batches):
                 # Get just minibatch amount of data
@@ -627,15 +609,13 @@ class CRBM(AbstractRBM):
                                   self.cond_data: cd_noise}
 
                 # Run the training step
-                (rec_cost, new_params, updates, h_means) = sess.run(train_op, feed_dict=feed)
+                sess.run(train_op, feed_dict=feed)
 
-                # Add up the cost
-                epoch_cost += rec_cost
-                epoch_h_means += h_means
             
-            epoch_cost = epoch_cost/n_batches
-            print('Epoch %i / %i | cost = %f | lr = %f | momentum = %f | sparse cost = %f'%
-                 (epoch+1, training_epochs, epoch_cost, learning_rate, momentum, sparse_cost))
+            epoch_cost = sess.run(reccost_op, feed_dict={self.input_data: input_data[idxs_i], self.cond_data: cond_data[idxs_i]})
+
+            print('Epoch %i / %i | cost = %f | lr = %f | momentum = %f'%
+                 (epoch+1, training_epochs, epoch_cost, learning_rate, momentum))
                     
             if snapshot_freq != 0 and (epoch+1) % snapshot_freq == 0:                
                 save_path = saver.save(sess, '%s%s_ep%i_model.ckpt' % (snapshot_dir, self.name, (epoch+1)))

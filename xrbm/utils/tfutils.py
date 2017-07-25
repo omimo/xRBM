@@ -21,7 +21,7 @@ def data_variable(shape, name='input_data'):
 
 def sample_bernoulli(means, n=-1):    
     if n==-1:
-        n = means.get_shape().as_list()[0]
+        n = tf.shape(means)[0]
     shape = [n , means.get_shape().as_list()[1]] #[n, means.get_shape()[1]]
     return tf.where(means - tf.random_uniform(shape) > 0, 
                                   tf.ones(shape), 
