@@ -219,10 +219,10 @@ class RBM(AbstractRBM):
         """
         with tf.variable_scope('sampling_vhv'):
             # h from v
-            bottom_up, h_probs_means, h_samples = self.sample_h_from_v(v_samples0, n=self.batch_size)
+            bottom_up, h_probs_means, h_samples = self.sample_h_from_v(v_samples0, n=tf.shape(v_samples0)[0])
 
             # v from h
-            top_bottom, v_probs_means, v_samples = self.sample_v_from_h(h_samples, n=self.batch_size)
+            top_bottom, v_probs_means, v_samples = self.sample_v_from_h(h_samples, n=tf.shape(v_samples0)[0])
 
 
 
@@ -268,8 +268,8 @@ class RBM(AbstractRBM):
             # calculate the sparsity term
             current_activations_mean_props = tf.reduce_mean(h_probs_means1, reduction_indices=0)
 
-            self.sp_hidden_means = sparse_decay * self.sp_hidden_means + (1 - sparse_decay) * current_activations_mean_props
-            sparse_grad = sparse_cost * (self.sp_hidden_means - sparse_target)
+            #self.sp_hidden_means = sparse_decay * self.sp_hidden_means + (1 - sparse_decay) * current_activations_mean_props
+            #sparse_grad = sparse_cost * (self.sp_hidden_means - sparse_target)
 
             for k in range(cd_k):
                 v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh(chain_data)
@@ -278,11 +278,10 @@ class RBM(AbstractRBM):
             ### update
             chain_end = v_samples
 
-        return v_probs_means, chain_end, sparse_grad, current_activations_mean_props
+        return v_probs_means, chain_end
 
     def train_step(self, visible_data, learning_rate,
-                   momentum=0, wdecay=0, cd_k=1,
-                   sparse_target=0, sparse_cost=0, sparse_decay=0):
+                   momentum=0, wdecay=0, cd_k=1):
         """
         Defines the operations needed for a training step of an RBM
 
@@ -316,11 +315,7 @@ class RBM(AbstractRBM):
         """
         with tf.variable_scope('train_step'):
             ## inference
-            chain_end_probs_means, chain_end, sparse_grad, current_activations_mean_props = self.inference(visible_data, 
-                                                            cd_k,
-                                                            sparse_target, 
-                                                            sparse_cost, 
-                                                            sparse_decay)
+            chain_end_probs_means, chain_end = self.inference(visible_data, cd_k)
 
             ## update
              # get the cost using free energy
@@ -333,9 +328,9 @@ class RBM(AbstractRBM):
             grad_params = tf.gradients(ys=cost, xs=self.model_params)
 
              # compose the update values, incorporating weight decay, momentum, and sparsity terms
-            wu_ = tf.assign(self.wu, momentum * self.wu + (grad_params[0] + sparse_grad - wdecay * self.W) * learning_rate)
+            wu_ = tf.assign(self.wu, momentum * self.wu + (grad_params[0] - wdecay * self.W) * learning_rate)
             vbu_ = tf.assign(self.vbu, momentum * self.vbu + grad_params[1] * learning_rate)
-            hbu_ = tf.assign(self.hbu, momentum * self.hbu + (grad_params[2] + sparse_grad) * learning_rate)
+            hbu_ = tf.assign(self.hbu, momentum * self.hbu + (grad_params[2]) * learning_rate)
 
             momentum_ops = [wu_, 
                             vbu_, 
@@ -428,7 +423,7 @@ class RBM(AbstractRBM):
 
     def train(self, sess, input_data, training_epochs, batch_size=100, learning_rate=0.1,
                     snapshot_dir='./logs/', snapshot_freq=100, cd_k=1,
-                    momentum=0, wdecay=0, sparse_target=0, sparse_cost=0, sparse_decay=0):
+                    momentum=0, wdecay=0):
         """
         Creates mini-batches and trains the RBM for the given number of epochs
 
@@ -479,10 +474,7 @@ class RBM(AbstractRBM):
                                    learning_rate, 
                                    momentum, 
                                    wdecay, 
-                                   cd_k=cd_k,
-                                   sparse_target=sparse_target, 
-                                   sparse_cost=sparse_cost, 
-                                   sparse_decay=sparse_decay)
+                                   cd_k=cd_k)
  
         # Run everything in tf 
         for epoch in range(training_epochs):
@@ -500,15 +492,15 @@ class RBM(AbstractRBM):
                 sess.run(train_op, feed_dict=feed)
                 
                 # Get the cost
-                
+                rec_cost = sess.run(reccost_op, feed_dict={self.batch_data: input_data[idxs_i]})                 
 
                 # Add up the cost
                 epoch_cost += rec_cost
                 # epoch_h_means += h_means
             
             epoch_cost = epoch_cost/n_batches
-            print('Epoch %i / %i | cost = %f | lr = %f | momentum = %f | sparse cost = %f'%
-                 (epoch+1, training_epochs, epoch_cost, learning_rate, momentum, sparse_cost))
+            print('Epoch %i / %i | cost = %f | lr = %f | momentum = %f'%
+                 (epoch+1, training_epochs, epoch_cost, learning_rate, momentum))
             
         # save_path = saver.save(sess, '%s%s_model.ckpt' % (snapshot_dir, self.name))
 

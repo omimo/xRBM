@@ -27,6 +27,9 @@ def sample_bernoulli(means, n=-1):
                                   tf.ones(shape), 
                                   tf.zeros(shape))
 
+def _sample_bernoulli(means, n=-1):
+    tf.nn.relu(tf.sign(means - tf.random_uniform(tf.shape(means))))
+
 # def sample_bernoulli(means, n):
 #     rand = np.random.rand(n, means.get_shape().as_list()[1])    
 #     return tf.nn.relu(tf.sign(means - rand)) 
