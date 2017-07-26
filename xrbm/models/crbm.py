@@ -214,7 +214,7 @@ class CRBM(AbstractRBM):
 
         return v_probs_means, v_samples, h_probs_means, h_samples
 
-    def gibbs_sample_hvh_condcont(self, h_samples0, condontA, condontB, n):
+    def gibbs_sample_hvh_condcont(self, h_samples0, condontA, condontB):
         """
         Runs a cycle of gibbs sampling, started with an initial hidden units activations
 
@@ -251,7 +251,7 @@ class CRBM(AbstractRBM):
             v_probs_means = self.activation(contributions_to_vis)
 
             if self.vis_type == 'binary':                
-                v_samples = tfutils.sample_bernoulli(v_probs_means, n)
+                v_samples = tfutils.sample_bernoulli(v_probs_means)
             elif self.vis_type == 'gaussian':
                 v_samples = contributions_to_vis # using means instead of sampling, as in Taylor et al
 
@@ -262,12 +262,12 @@ class CRBM(AbstractRBM):
                          self.hbias) # static hidden biases
 
             h_probs_means = self.activation(contributions_to_hid)
-            h_samples = tfutils.sample_bernoulli(h_probs_means, n)
+            h_samples = tfutils.sample_bernoulli(h_probs_means)
 
 
         return v_probs_means, v_samples, h_probs_means, h_samples
     
-    def gibbs_sample_vhv(self, v_samples0, cond, n):
+    def gibbs_sample_vhv(self, v_samples0, cond):
         """
         Runs a cycle of gibbs sampling, started with an initial visible and condition units configurations
 
@@ -335,9 +335,7 @@ class CRBM(AbstractRBM):
 #            condcontB = tf.matmul(cond_data, self.B)
             for k in range(cd_k): #TODO: this has to be more efficient since cond_data does not change
 #                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh_condcont(chain_data, 
-#                                                            condcontA,
-#                                                            condcontB,
-#                                                            self.batch_size)
+#                                                            condcontA, condcontB)
 
                 v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh(chain_data, 
                                                             cond_data)
@@ -348,6 +346,47 @@ class CRBM(AbstractRBM):
             chain_end = v_samples
 
         return v_probs_means, chain_end
+
+
+    def inference2(self, input_data, cond_data, cd_k=1):
+        """
+        Defines the tensorflow operations for inference
+
+        Parameters
+        ----------
+        input_data:     tensor
+            the input (batch) data tensor
+        cond_data:      tensor
+            the condition data tensor
+        cd_k=1:         int, default 1
+            the number of CD steps for gibbs sampling
+
+        Returns
+        -------
+        v_probs_means:  tensor
+            a tensor containing the mean probabilities of the visible units
+        chain_end:      tensor
+            the last visible samples generated in the gibbs cycles
+        """
+
+        with tf.variable_scope('inference'):
+            chain_data = input_data
+
+#            condcontA = tf.matmul(cond_data, self.A)
+#            condcontB = tf.matmul(cond_data, self.B)
+            for k in range(cd_k): #TODO: this has to be more efficient since cond_data does not change
+#                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh_condcont(chain_data, 
+#                                                            condcontA, condcontB)
+
+                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_vhv(chain_data, 
+                                                            cond_data)
+
+                chain_data = v_samples
+
+            chain_end = v_samples
+
+        return v_probs_means, chain_end
+
 
     def train_step(self, visible_data, cond_data, learning_rate,
                    momentum=0, wdecay=0, cd_k=1):
@@ -384,7 +423,7 @@ class CRBM(AbstractRBM):
 
         with tf.variable_scope('train_step'):
             ## inference
-            chain_end_probs_means, chain_end = self.inference(visible_data, cond_data, cd_k)
+            chain_end_probs_means, chain_end = self.inference2(visible_data, cond_data, cd_k)
 
             ## update
              # get the cost using free energy
@@ -462,7 +501,7 @@ class CRBM(AbstractRBM):
         cost:       float
             the reconstruction cost
         """
-        recon_means,_,_,_ = self.gibbs_sample_vhv(input_data, cond_data, tf.shape(input_data)[0])
+        recon_means,_,_,_ = self.gibbs_sample_vhv(input_data, cond_data)
 
         #cost = costs.cross_entropy(input_data, recon_means)
         cost = costs.mse(input_data, recon_means)
@@ -523,7 +562,7 @@ class CRBM(AbstractRBM):
 
         # gibbs
         for k in range(num_gibbs): #TODO: this has to be more efficient since cond_data does not change
-            vmean, sample, hmean, hsample = self.gibbs_sample_vhv(init, cond, 1)
+            vmean, sample, hmean, hsample = self.gibbs_sample_vhv(init, cond)
             init = sample
         
         # mean-field approximation as suggested by Taylor
