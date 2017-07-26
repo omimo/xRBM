@@ -418,7 +418,7 @@ class CRBM(AbstractRBM):
             the value of updates for each model parameter
         """
         learning_rateW = learning_rate
-        learning_rateA = learning_rate * 0.01 # it's a hack, the autoregressive weights often need a smaller lr
+        learning_rateA = learning_rate * 0.1 # it's a hack, the autoregressive weights often need a smaller lr
         learning_rateB = learning_rate
 
         with tf.variable_scope('train_step'):
