@@ -197,7 +197,7 @@ class RBM(AbstractRBM):
 
         return v_probs_means, v_samples, h_probs_means, h_samples
 
-    def gibbs_sample_vhv(self, v_samples0):    
+    def gibbs_sample_vhv(self, v_samples0, *data):    
         """
         Runs a cycle of gibbs sampling, started with an initial hidden units activations
 

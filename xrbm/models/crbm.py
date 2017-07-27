@@ -1,5 +1,5 @@
 """
-CRestricted Boltzmann Machines (CRBM) Implementation in Tensorflow
+Conditional Restricted Boltzmann Machines (CRBM) Implementation in Tensorflow
 """
 
 import tensorflow as tf
@@ -166,8 +166,8 @@ class CRBM(AbstractRBM):
             a tensor containing a sample of visible units generated from the top bottom contributions
         """ 
         with tf.variable_scope('sampling_vh'):
-            contributions = (tf.matmul(hidden, tf.transpose(self.W)) + # hidden to visible
-                          tf.matmul(cond, self.A) + # condition to visible
+            contributions = (tf.matmul(hidden, tf.transpose(self.W), name='hidden_to_visible') + # hidden to visible
+                          tf.matmul(cond, self.A, name='condition_to_visible') + # condition to visible
                           self.vbias) # static visible biases
 
             v_probs_means = self.activation(contributions)
@@ -296,7 +296,7 @@ class CRBM(AbstractRBM):
 
             # v from h
             top_bottom, v_probs_means, v_samples = self.sample_v_from_hc(h_samples, cond)
-
+        
         return v_probs_means, v_samples, h_probs_means, h_samples
 
     def inference(self, input_data, cond_data, cd_k=1):
@@ -378,15 +378,31 @@ class CRBM(AbstractRBM):
 #                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh_condcont(chain_data, 
 #                                                            condcontA, condcontB)
 
-                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_vhv(chain_data, 
+                _, v_samples, _, _ = self.gibbs_sample_vhv(chain_data, 
                                                             cond_data)
 
                 chain_data = v_samples
+            
 
-            chain_end = v_samples
+            chain_end = tf.stop_gradient(v_samples)
 
-        return v_probs_means, chain_end
+        return chain_end
 
+    def inference3(self, input_data, cond_data, cd_k=1):
+        def gibbs_step(i, chain_sample):
+            i = tf.add(i,1)
+            chain_sample,_, _, _ = self.gibbs_sample_vhv(chain_sample, cond_data)
+            return i, chain_sample
+
+        with tf.variable_scope('inference'):
+            counter = tf.constant(0)
+            c = lambda i, *args: tf.less(i, cd_k)
+            [_,chain_end] = tf.while_loop(c, gibbs_step, [counter, input_data], name='cd_loop')
+         
+
+        #return chain_end
+        print(chain_end.get_shape())
+        return tf.stop_gradient(chain_end)
 
     def train_step(self, visible_data, cond_data, learning_rate,
                    momentum=0, wdecay=0, cd_k=1):
@@ -418,45 +434,48 @@ class CRBM(AbstractRBM):
             the value of updates for each model parameter
         """
         learning_rateW = learning_rate
-        learning_rateA = learning_rate * 0.1 # it's a hack, the autoregressive weights often need a smaller lr
+        learning_rateA = learning_rate * 0.01 # it's a hack, the autoregressive weights often need a smaller lr
         learning_rateB = learning_rate
 
         with tf.variable_scope('train_step'):
             ## inference
-            chain_end_probs_means, chain_end = self.inference2(visible_data, cond_data, cd_k)
+            chain_end = self.inference3(visible_data, cond_data, cd_k)
 
             ## update
              # get the cost using free energy
             cost = self.get_cost(visible_data, cond_data, chain_end)
+            
+            with tf.name_scope('regularizers'):
+                # regularize
+                if self.W_regularizer is not None:
+                    cost = cost + self.W_regularizer(self.W)
 
-            # regularize
-            if self.W_regularizer is not None:
-                cost = cost + self.W_regularizer(self.W)
+                if self.A_regularizer is not None:
+                    cost = cost + self.A_regularizer(self.A)
 
-            if self.A_regularizer is not None:
-                cost = cost + self.A_regularizer(self.A)
-
-            if self.B_regularizer is not None:
-                cost = cost + self.B_regularizer(self.B)
+                if self.B_regularizer is not None:
+                    cost = cost + self.B_regularizer(self.B)
 
              # calculate the gradients using tf
             grad_params = tf.gradients(ys=cost, xs=self.model_params)
+            
 
-             # compose the update values, incorporating weight decay, momentum, and sparsity terms
-            wu_ = tf.assign(self.wu, momentum * self.wu + (grad_params[0] - wdecay * self.W) * learning_rateW)
-            au_ = tf.assign(self.au, momentum * self.au + (grad_params[1] - wdecay * self.A) * learning_rateA)
-            bu_ = tf.assign(self.bu, momentum * self.bu + (grad_params[2] - wdecay * self.B) * learning_rateB)
-            vbu_ = tf.assign(self.vbu, momentum * self.vbu + grad_params[3] * learning_rate)
-            hbu_ = tf.assign(self.hbu, momentum * self.hbu + grad_params[4] * learning_rate)
+            with tf.name_scope('updates'):
+                 # compose the update values, incorporating weight decay, momentum, and sparsity terms
+                wu_ = tf.assign(self.wu, momentum * self.wu + (grad_params[0] - wdecay * self.W) * learning_rateW)
+                au_ = tf.assign(self.au, momentum * self.au + (grad_params[1] - wdecay * self.A) * learning_rateA)
+                bu_ = tf.assign(self.bu, momentum * self.bu + (grad_params[2] - wdecay * self.B) * learning_rateB)
+                vbu_ = tf.assign(self.vbu, momentum * self.vbu + grad_params[3] * learning_rate)
+                hbu_ = tf.assign(self.hbu, momentum * self.hbu + grad_params[4] * learning_rate)
 
-            momentum_ops = [wu_, au_, bu_, vbu_, hbu_]
+                momentum_ops = [wu_, au_, bu_, vbu_, hbu_]
 
-             # ops to update the parameters
-            update_ops = [tf.assign_sub(self.W, self.wu),
-                          tf.assign_sub(self.A, self.au),
-                          tf.assign_sub(self.B, self.bu),
-                          tf.assign_sub(self.vbias, self.vbu),
-                          tf.assign_sub(self.hbias, self.hbu)]
+                 # ops to update the parameters
+                update_ops = [tf.assign_sub(self.W, self.wu),
+                              tf.assign_sub(self.A, self.au),
+                              tf.assign_sub(self.B, self.bu),
+                              tf.assign_sub(self.vbias, self.vbu),
+                              tf.assign_sub(self.hbias, self.hbu)]
 
 
         return [momentum_ops, update_ops]
