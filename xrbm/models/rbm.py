@@ -7,15 +7,13 @@ import tensorflow as tf
 import numpy as np
 from xrbm.utils import tfutils
 from xrbm.utils import costs as costs
-from .abstract_model import AbstractRBM
 
-class RBM(AbstractRBM):
+class RBM():
     'Restricted Boltzmann Machines (RBM)'
 
     def __init__(self, num_vis, num_hid, vis_type='binary',
                  activation=tf.nn.sigmoid,  
                  initializer=tf.contrib.layers.variance_scaling_initializer(), # He Init
-                 W_regularizer=None,
                  name='RBM'):
         """
         The RBM Constructor
@@ -33,11 +31,15 @@ class RBM(AbstractRBM):
         name:          string
             the name of the object (used for Tensorflow's scope)
         """
-        super(RBM, self).__init__(num_vis, num_hid, vis_type, 
-                                  activation=activation, 
-                                  initializer=initializer, 
-                                  name=name)
 
+        # Model Param
+        self.num_vis = num_vis
+        self.num_hid = num_hid
+        self.vis_type = vis_type
+        self.name = name
+        self.activation = activation
+        self.initializer = initializer
+        
         # Weights
         self.W = None
 
@@ -47,12 +49,6 @@ class RBM(AbstractRBM):
 
         # Learning params
         self.model_params = None
-        self.wu = None
-        self.vbu = None
-        self.hbu = None
-
-        # Regularizer
-        self.W_regularizer = W_regularizer
 
         with tf.variable_scope(self.name):
             self.create_placeholders_variables()
@@ -61,13 +57,6 @@ class RBM(AbstractRBM):
         """
         Creates the TF placeholders and variables used by the object
         """
-        with tf.variable_scope(self.name):
-            self.sp_hidden_means = tf.get_variable(name='sp_hidden_means',
-                                                   shape=[self.num_hid],
-                                                   initializer=tf.constant_initializer(0))
-
-            self.batch_data = tfutils.data_variable((None, self.num_vis),'batch_data')
-
         with tf.variable_scope('params'):
             self.W = tf.get_variable(shape=[self.num_vis, self.num_hid], 
                                      initializer=self.initializer,
@@ -78,34 +67,6 @@ class RBM(AbstractRBM):
 
             self.model_params = [self.W, self.vbias, self.hbias]
 
-        with tf.variable_scope('updates'):
-            self.wu = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
-            self.vbu = tfutils.bias_variable([self.num_vis], 'vbias')
-            self.hbu = tfutils.bias_variable([self.num_hid], 'hbias')           
-
-    def load_model_params(self, _W, _vbias, _hbias):
-        """
-        Loads the model parameters from Numpy arrays
-
-        Parameters
-        ----------
-        _W:     array_like
-            The weight matrix
-        _vbias: array_like
-            The visible biases
-        _hbias: array_like
-            The hidden biases 
-        """
-        with tf.variable_scope(self.name):
-            with tf.variable_scope('params'):
-                self.W = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights') #TODO: add reuse parameter
-                self.vbias = tfutils.bias_variable([self.num_vis], 'vbias')
-                self.hbias = tfutils.bias_variable([self.num_hid], 'hbias')
-
-                self.model_params = [self.W, self.vbias, self.hbias]
-                self.W.assign(_W)
-                self.vbias.assign(_vbias)
-                self.hbias.assign(_hbias)
 
     def sample_h_from_v(self, visible, n=-1):
         """
