@@ -1,1 +1,1 @@
-from .cdlearner import CDLearner
+from .cdlearner import CDApproximator

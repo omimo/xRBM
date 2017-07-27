@@ -9,15 +9,12 @@ from xrbm.utils import tfutils
 from xrbm.utils import costs as costs
 from .abstract_model import AbstractRBM
 
-class CRBM(AbstractRBM):
+class CRBM():
     'Conditional Restricted Boltzmann Machines (CRBM)'
 
     def __init__(self, num_vis, num_cond, num_hid, vis_type='binary',
                  activation=tf.nn.sigmoid,  
                  initializer=tf.contrib.layers.variance_scaling_initializer(), # He Init
-                 W_regularizer=None,
-                 A_regularizer=None,
-                 B_regularizer=None,
                  name='CRBM'):
         """
         The CRBM Constructor
@@ -37,9 +34,14 @@ class CRBM(AbstractRBM):
         name:          string
             the name of the object (used for Tensorflow's scope)
         """
-        super(CRBM, self).__init__(num_vis, num_hid, vis_type, activation, initializer, name)
-
-        # Model Params
+        
+        # Model Param
+        self.num_vis = num_vis
+        self.num_hid = num_hid
+        self.vis_type = vis_type
+        self.name = name
+        self.activation = activation
+        self.initializer = initializer
         self.num_cond = num_cond
 
         # Weights
@@ -53,16 +55,6 @@ class CRBM(AbstractRBM):
 
         # Learning params
         self.model_params = None
-        self.wu = None
-        self.au = None
-        self.bu = None
-        self.vbu = None
-        self.hbu = None
-
-        # Regularizer
-        self.W_regularizer = W_regularizer
-        self.A_regularizer = A_regularizer
-        self.B_regularizer = B_regularizer
 
         with tf.variable_scope(self.name):
             self.create_placeholders_variables()
@@ -71,14 +63,6 @@ class CRBM(AbstractRBM):
         """
         Creates 
         """
-        with tf.variable_scope(self.name):
-            self.sp_hidden_means = tf.get_variable(name='sp_hidden_means',
-                                                   shape=[self.num_hid],
-                                                   initializer=tf.constant_initializer(0.2))
-
-            self.input_data = tfutils.data_variable((None, self.num_vis),'input_data')
-            self.cond_data = tfutils.data_variable((None, self.num_cond),'condition_data')
-
         with tf.variable_scope('params'):
             self.W = tf.get_variable(shape=[self.num_vis, self.num_hid], 
                                      initializer=self.initializer,
@@ -99,15 +83,6 @@ class CRBM(AbstractRBM):
             self.hbias = tfutils.bias_variable([self.num_hid], 'hbias')
 
             self.model_params = [self.W, self.A, self.B, self.vbias, self.hbias]
-
-        with tf.variable_scope('updates'):
-            self.wu = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
-            self.au = tfutils.weight_variable([self.num_cond, self.num_vis], 'c2v_weights')
-            self.bu = tfutils.weight_variable([self.num_cond, self.num_hid], 'c2h_weights')
-
-            self.vbu = tfutils.bias_variable([self.num_vis], 'vbias', initializer=tf.constant_initializer(0.0))
-            self.hbu = tfutils.bias_variable([self.num_hid], 'hbias')           
-
 
     def sample_h_from_vc(self, visible, cond, n=-1): 
         """
