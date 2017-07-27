@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -40,6 +42,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -80,7 +83,10 @@
           
             
             
-                <p class="caption"><span class="caption-text">Contents:</span></p>
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../rbm.html">Restricted Boltzmann Machine (RBM)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../crbm.html">Conditional Restricted Boltzmann Machine (CRBM)</a></li>
@@ -99,8 +105,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../../index.html">xRBM Library</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">xRBM Library</a>
+        
       </nav>
 
 
@@ -113,19 +121,36 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      
-    <li>xrbm.models.rbm</li>
+        
+      <li>xrbm.models.rbm</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -135,19 +160,20 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Restricted Boltzmann Machines (RBM) Implementation in Tensorflow</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
 
-<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">xrbm.utils</span> <span class="kn">import</span> <span class="n">tfutils</span>
-<span class="kn">from</span> <span class="nn">xrbm.utils</span> <span class="kn">import</span> <span class="n">costs</span> <span class="k">as</span> <span class="n">costs</span>
-<span class="kn">from</span> <span class="nn">.abstract_model</span> <span class="kn">import</span> <span class="n">AbstractRBM</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">xrbm.utils</span> <span class="k">import</span> <span class="n">tfutils</span>
+<span class="kn">from</span> <span class="nn">xrbm.utils</span> <span class="k">import</span> <span class="n">costs</span> <span class="k">as</span> <span class="n">costs</span>
 
-<div class="viewcode-block" id="RBM"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM">[docs]</a><span class="k">class</span> <span class="nc">RBM</span><span class="p">(</span><span class="n">AbstractRBM</span><span class="p">):</span>
+<div class="viewcode-block" id="RBM"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM">[docs]</a><span class="k">class</span> <span class="nc">RBM</span><span class="p">():</span>
     <span class="s1">&#39;Restricted Boltzmann Machines (RBM)&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_vis</span><span class="p">,</span> <span class="n">num_hid</span><span class="p">,</span> <span class="n">vis_type</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span>
-                 <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">,</span>  <span class="n">name</span><span class="o">=</span><span class="s1">&#39;RBM&#39;</span><span class="p">):</span>
+                 <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">,</span>  
+                 <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">variance_scaling_initializer</span><span class="p">(),</span> <span class="c1"># He Init</span>
+                 <span class="n">name</span><span class="o">=</span><span class="s1">&#39;RBM&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The RBM Constructor</span>
 
@@ -164,20 +190,24 @@
 <span class="sd">        name:          string</span>
 <span class="sd">            the name of the object (used for Tensorflow&#39;s scope)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">RBM</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">num_vis</span><span class="p">,</span> <span class="n">num_hid</span><span class="p">,</span> <span class="n">vis_type</span><span class="p">,</span> <span class="n">activation</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
+        <span class="c1"># Model Param</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span> <span class="o">=</span> <span class="n">num_vis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span> <span class="o">=</span> <span class="n">num_hid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">=</span> <span class="n">vis_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">activation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initializer</span> <span class="o">=</span> <span class="n">initializer</span>
+        
         <span class="c1"># Weights</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Biases</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># Learning params</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">wu</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vbu</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hbu</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">create_placeholders_variables</span><span class="p">()</span>
@@ -186,48 +216,16 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the TF placeholders and variables used by the object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sp_hidden_means</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;sp_hidden_means&#39;</span><span class="p">,</span>
-                                                   <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span>
-                                                   <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">batch_data</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">data_variable</span><span class="p">((</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">),</span><span class="s1">&#39;batch_data&#39;</span><span class="p">)</span>
-
         <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;params&#39;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">weight_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;main_weights&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> 
+                                     <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializer</span><span class="p">,</span>
+                                     <span class="n">name</span><span class="o">=</span><span class="s1">&#39;main_weights&#39;</span><span class="p">)</span>
+            <span class="c1">#self.W = tfutils.weight_variable([self.num_vis, self.num_hid], &#39;main_weights&#39;)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">bias_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">],</span> <span class="s1">&#39;vbias&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">bias_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;hbias&#39;</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="p">]</span></div>
 
-        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;updates&#39;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">wu</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">weight_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;main_weights&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">vbu</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">bias_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">],</span> <span class="s1">&#39;vbias&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">hbu</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">bias_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;hbias&#39;</span><span class="p">)</span>           </div>
-
-<div class="viewcode-block" id="RBM.load_model_params"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM.load_model_params">[docs]</a>    <span class="k">def</span> <span class="nf">load_model_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_W</span><span class="p">,</span> <span class="n">_vbias</span><span class="p">,</span> <span class="n">_hbias</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Loads the model parameters from Numpy arrays</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        _W:     array_like</span>
-<span class="sd">            The weight matrix</span>
-<span class="sd">        _vbias: array_like</span>
-<span class="sd">            The visible biases</span>
-<span class="sd">        _hbias: array_like</span>
-<span class="sd">            The hidden biases </span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
-            <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;params&#39;</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">weight_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;main_weights&#39;</span><span class="p">)</span> <span class="c1">#TODO: add reuse parameter</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">bias_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">],</span> <span class="s1">&#39;vbias&#39;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">bias_variable</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="s1">&#39;hbias&#39;</span><span class="p">)</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">_W</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">_vbias</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">_hbias</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RBM.sample_h_from_v"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM.sample_h_from_v">[docs]</a>    <span class="k">def</span> <span class="nf">sample_h_from_v</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">n</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -286,7 +284,7 @@
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">:</span>
                 <span class="n">v_samples</span> <span class="o">=</span> <span class="n">top_bottom</span> <span class="c1"># using means instead of sampling, as in Taylor et al</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">v_samples</span> <span class="o">=</span>  <span class="bp">None</span>
+                <span class="n">v_samples</span> <span class="o">=</span>  <span class="kc">None</span>
 
         <span class="k">return</span> <span class="n">top_bottom</span><span class="p">,</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span></div>
 
@@ -319,125 +317,39 @@
 
         <span class="k">return</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span></div>
 
-<div class="viewcode-block" id="RBM.inference"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM.inference">[docs]</a>    <span class="k">def</span> <span class="nf">inference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">cd_k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sparse_target</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_cost</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_decay</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="RBM.gibbs_sample_vhv"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM.gibbs_sample_vhv">[docs]</a>    <span class="k">def</span> <span class="nf">gibbs_sample_vhv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_samples0</span><span class="p">,</span> <span class="o">*</span><span class="n">data</span><span class="p">):</span>    
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Defines the tensorflow operations for inference</span>
+<span class="sd">        Runs a cycle of gibbs sampling, started with an initial hidden units activations</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        input_data:     tensor</span>
-<span class="sd">            the input (batch) data tensor</span>
-<span class="sd">        cd_k=1:         int, default 1</span>
-<span class="sd">            the number of CD steps for gibbs sampling</span>
-<span class="sd">        sparse_target:  float, default 0</span>
-<span class="sd">            the sparsity target</span>
-<span class="sd">        sparse_cost:    float, default 0</span>
-<span class="sd">            the sparsity cost</span>
-<span class="sd">        sparse_decay:   float, default 0</span>
-<span class="sd">            the sparsity weight decay</span>
-
+<span class="sd">        v_samples0:    tensor</span>
+<span class="sd">            a tensor of visible units values</span>
+<span class="sd">        </span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        v_probs_means:  tensor</span>
-<span class="sd">            a tensor containing the mean probabilities of the visible units</span>
-<span class="sd">        chain_end:      tensor</span>
-<span class="sd">            the last visible samples generated in the gibbs cycles</span>
-<span class="sd">        sparse_grad:    tensor</span>
-<span class="sd">            the sparisity gradients</span>
-<span class="sd">        current_activations_mean_props:     tensor</span>
-<span class="sd">            the mean activation of the hidden units</span>
+
+<span class="sd">        v_samples:      tensor</span>
+<span class="sd">            visible samples</span>
+<span class="sd">        h_probs_means:  tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the hidden units activations</span>
+<span class="sd">        h_samples:      tensor</span>
+<span class="sd">            a tensor containing a bernoulli sample generated from the mean activations</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;sampling_vhv&#39;</span><span class="p">):</span>
+            <span class="c1"># h from v</span>
+            <span class="n">bottom_up</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_h_from_v</span><span class="p">(</span><span class="n">v_samples0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">v_samples0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
-        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;inference&#39;</span><span class="p">):</span>
-            <span class="c1">### positive phase</span>
-            <span class="c1"># bottom-up - initialze the network with training data</span>
-            
-            <span class="n">_</span><span class="p">,</span> <span class="n">h_probs_means1</span><span class="p">,</span> <span class="n">h_samples1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_h_from_v</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span>
+            <span class="c1"># v from h</span>
+            <span class="n">top_bottom</span><span class="p">,</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_v_from_h</span><span class="p">(</span><span class="n">h_samples</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">v_samples0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
-            <span class="n">chain_data</span> <span class="o">=</span> <span class="n">h_samples1</span>
 
-            <span class="c1"># calculate the sparsity term</span>
-            <span class="n">current_activations_mean_props</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">h_probs_means1</span><span class="p">,</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">sp_hidden_means</span> <span class="o">=</span> <span class="n">sparse_decay</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">sp_hidden_means</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sparse_decay</span><span class="p">)</span> <span class="o">*</span> <span class="n">current_activations_mean_props</span>
-            <span class="n">sparse_grad</span> <span class="o">=</span> <span class="n">sparse_cost</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sp_hidden_means</span> <span class="o">-</span> <span class="n">sparse_target</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span></div>
 
-            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cd_k</span><span class="p">):</span>
-                <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gibbs_sample_hvh</span><span class="p">(</span><span class="n">chain_data</span><span class="p">)</span>
-                <span class="n">chain_data</span> <span class="o">=</span> <span class="n">h_samples</span>
 
-            <span class="c1">### update</span>
-            <span class="n">chain_end</span> <span class="o">=</span> <span class="n">v_samples</span>
-
-        <span class="k">return</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">chain_end</span><span class="p">,</span> <span class="n">sparse_grad</span><span class="p">,</span> <span class="n">current_activations_mean_props</span></div>
-
-<div class="viewcode-block" id="RBM.train_step"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM.train_step">[docs]</a>    <span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible_data</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span>
-                   <span class="n">momentum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">wdecay</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">cd_k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                   <span class="n">sparse_target</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_cost</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_decay</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Defines the operations needed for a training step of an RBM</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        visible_data:       tensor</span>
-<span class="sd">            the input (batch) data tensor</span>
-<span class="sd">        learning_rate:      float</span>
-<span class="sd">            the learning rate</span>
-<span class="sd">        momentum:           float, default 0</span>
-<span class="sd">            the momentum value</span>
-<span class="sd">        wdecay:             float, default 0</span>
-<span class="sd">            the weight decay value</span>
-<span class="sd">        cd_k:               int, default 1</span>
-<span class="sd">            the number of CD steps for gibbs sampling</span>
-<span class="sd">        sparse_target:  float, default 0</span>
-<span class="sd">            the sparsity target</span>
-<span class="sd">        sparse_cost:    float, default 0</span>
-<span class="sd">            the sparsity cost</span>
-<span class="sd">        sparse_decay:   float, default 0</span>
-<span class="sd">            the sparsity weight decay</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        rec_cost:       float</span>
-<span class="sd">            the reconstruction cost for this step</span>
-<span class="sd">        new_params:     list of tensors</span>
-<span class="sd">            the updated model parameters</span>
-<span class="sd">        updates:        list of tensors</span>
-<span class="sd">            the value of updates for each model parameter</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;train_step&#39;</span><span class="p">):</span>
-            <span class="c1">## inference</span>
-            <span class="n">chain_end_probs_means</span><span class="p">,</span> <span class="n">chain_end</span><span class="p">,</span> <span class="n">sparse_grad</span><span class="p">,</span> <span class="n">current_activations_mean_props</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inference</span><span class="p">(</span><span class="n">visible_data</span><span class="p">,</span> <span class="n">cd_k</span><span class="p">,</span>
-                                                        <span class="n">sparse_target</span><span class="p">,</span> <span class="n">sparse_cost</span><span class="p">,</span> <span class="n">sparse_decay</span><span class="p">)</span>
-
-            <span class="c1">## update</span>
-             <span class="c1"># get the cost using free energy</span>
-            <span class="n">cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cost</span><span class="p">(</span><span class="n">visible_data</span><span class="p">,</span> <span class="n">chain_end</span><span class="p">)</span>
-
-             <span class="c1"># calculate the gradients using tf</span>
-            <span class="n">grad_params</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gradients</span><span class="p">(</span><span class="n">ys</span><span class="o">=</span><span class="n">cost</span><span class="p">,</span> <span class="n">xs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_params</span><span class="p">)</span>
-
-             <span class="c1"># compose the update values, incorporating weight decay, momentum, and sparsity terms</span>
-            <span class="n">wu_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wu</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">momentum</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">wu</span> <span class="o">+</span> <span class="p">(</span><span class="n">grad_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">sparse_grad</span> <span class="o">-</span> <span class="n">wdecay</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">*</span> <span class="n">learning_rate</span><span class="p">)</span>
-            <span class="n">vbu_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbu</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">momentum</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbu</span> <span class="o">+</span> <span class="n">grad_params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">learning_rate</span><span class="p">)</span>
-            <span class="n">hbu_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbu</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">momentum</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbu</span> <span class="o">+</span> <span class="p">(</span><span class="n">grad_params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">sparse_grad</span><span class="p">)</span> <span class="o">*</span> <span class="n">learning_rate</span><span class="p">)</span>
-
-            <span class="n">updates</span> <span class="o">=</span> <span class="p">[</span><span class="n">wu_</span><span class="p">,</span> <span class="n">vbu_</span><span class="p">,</span> <span class="n">hbu_</span><span class="p">]</span>
-
-             <span class="c1"># update the parameters</span>
-            <span class="n">w_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">assign_sub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wu</span><span class="p">)</span>
-            <span class="n">vb_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="o">.</span><span class="n">assign_sub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vbu</span><span class="p">)</span>
-            <span class="n">hb_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="o">.</span><span class="n">assign_sub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hbu</span><span class="p">)</span>
-
-             <span class="c1"># we need to return the new params so that tf considers them in the graph</span>
-            <span class="n">new_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">w_</span><span class="p">,</span> <span class="n">vb_</span><span class="p">,</span> <span class="n">hb_</span><span class="p">]</span>
-
-            <span class="c1">## evaluate the reconstruction capability of the model</span>
-            <span class="n">rec_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_reconstruction_cost</span><span class="p">(</span><span class="n">visible_data</span><span class="p">,</span> <span class="n">chain_end_probs_means</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">rec_cost</span><span class="p">,</span> <span class="n">new_params</span><span class="p">,</span> <span class="n">updates</span><span class="p">,</span> <span class="n">current_activations_mean_props</span> <span class="c1">#TODO: Remove</span></div>
-
-<div class="viewcode-block" id="RBM.get_cost"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM.get_cost">[docs]</a>    <span class="k">def</span> <span class="nf">get_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_sample</span><span class="p">,</span> <span class="n">chain_end</span><span class="p">):</span>
+<div class="viewcode-block" id="RBM.get_cost"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM.get_cost">[docs]</a>    <span class="k">def</span> <span class="nf">get_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_sample</span><span class="p">,</span> <span class="n">chain_end</span><span class="p">,</span> <span class="n">in_data</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the free-energy cost between two data tensors, used for calcuating the gradients</span>
 <span class="sd">    </span>
@@ -458,7 +370,7 @@
                     <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">free_energy</span><span class="p">(</span><span class="n">chain_end</span><span class="p">),</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cost</span></div>
 
-<div class="viewcode-block" id="RBM.get_reconstruction_cost"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM.get_reconstruction_cost">[docs]</a>    <span class="k">def</span> <span class="nf">get_reconstruction_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">recon_means</span><span class="p">):</span>
+<div class="viewcode-block" id="RBM.get_reconstruction_cost"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM.get_reconstruction_cost">[docs]</a>    <span class="k">def</span> <span class="nf">get_reconstruction_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the reconstruction cost between input data and reconstructed data</span>
 <span class="sd">    </span>
@@ -474,10 +386,13 @@
 <span class="sd">        cost:       float</span>
 <span class="sd">            the reconstruction cost</span>
 <span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">recon_means</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gibbs_sample_vhv</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+
         <span class="c1"># cost = costs.cross_entropy(input_data, recon_means)</span>
         <span class="n">cost</span> <span class="o">=</span> <span class="n">costs</span><span class="o">.</span><span class="n">mse</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">recon_means</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cost</span></div>
-
+    
+    
 <div class="viewcode-block" id="RBM.free_energy"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM.free_energy">[docs]</a>    <span class="k">def</span> <span class="nf">free_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_sample</span><span class="p">):</span> 
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calcuates the free-energy of a given visible tensor</span>
@@ -503,95 +418,14 @@
 
             <span class="n">h</span> <span class="o">=</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">bottom_up</span><span class="p">)),</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;hidden_term&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>        </div>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>        </div></div>
 
 
-<div class="viewcode-block" id="RBM.train"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.rbm.RBM.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sess</span><span class="p">,</span> <span class="n">input_data</span><span class="p">,</span> <span class="n">training_epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-                    <span class="n">snapshot_dir</span><span class="o">=</span><span class="s1">&#39;./logs/&#39;</span><span class="p">,</span> <span class="n">snapshot_freq</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">cd_k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                    <span class="n">momentum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">wdecay</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_target</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_cost</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sparse_decay</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Creates mini-batches and trains the RBM for the given number of epochs</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        input_data:         tensor</span>
-<span class="sd">            the input data tensor</span>
-<span class="sd">        training_epochs:    float</span>
-<span class="sd">            the number of training epochs</span>
-<span class="sd">        batch_size:         int</span>
-<span class="sd">            the size of each mini batch</span>
-<span class="sd">        learning_rate:      float, default 0.1</span>
-<span class="sd">            the learning rate</span>
-<span class="sd">        snapshot_dir:       string, default logs</span>
-<span class="sd">            the directory to store model snapshots and logs</span>
-<span class="sd">        snapshot_freq:      int, default 100</span>
-<span class="sd">            the frequency of the epochs to save a model snapshot</span>
-<span class="sd">        cd_k:               int, default 1</span>
-<span class="sd">            the number of CD steps for gibbs sampling</span>
-<span class="sd">        momentum:           float, default 0</span>
-<span class="sd">            the momentum value</span>
-<span class="sd">        wdecay:             float, default 0</span>
-<span class="sd">            the weight decay value</span>
-<span class="sd">        sparse_target:  float, default 0</span>
-<span class="sd">            the sparsity target</span>
-<span class="sd">        sparse_cost:    float, default 0</span>
-<span class="sd">            the sparsity cost</span>
-<span class="sd">        sparse_decay:   float, default 0</span>
-<span class="sd">            the sparsity weight decay</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        W:      array_like</span>
-<span class="sd">            the numpy weight matrix</span>
-<span class="sd">        vbias:      array_like</span>
-<span class="sd">            the numpy visible biases</span>
-<span class="sd">        hbias:      array_like</span>
-<span class="sd">            the numpy hidden biases</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
-
-        <span class="c1"># Make batches</span>
-        <span class="n">batch_idxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_data</span><span class="p">)))</span>
-        <span class="n">n_batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_idxs</span><span class="p">)</span> <span class="o">//</span> <span class="n">batch_size</span>
-        
-        <span class="c1"># Define train ops            </span>
-        <span class="n">train_op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_step</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_data</span><span class="p">,</span> 
-                                   <span class="n">learning_rate</span><span class="p">,</span> 
-                                   <span class="n">momentum</span><span class="p">,</span> 
-                                   <span class="n">wdecay</span><span class="p">,</span> 
-                                   <span class="n">cd_k</span><span class="o">=</span><span class="n">cd_k</span><span class="p">,</span>
-                                   <span class="n">sparse_target</span><span class="o">=</span><span class="n">sparse_target</span><span class="p">,</span> 
-                                   <span class="n">sparse_cost</span><span class="o">=</span><span class="n">sparse_cost</span><span class="p">,</span> 
-                                   <span class="n">sparse_decay</span><span class="o">=</span><span class="n">sparse_decay</span><span class="p">)</span>
- 
-        <span class="c1"># Run everything in tf </span>
-        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">training_epochs</span><span class="p">):</span>
-            <span class="n">epoch_cost</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">epoch_h_means</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-
-            <span class="k">for</span> <span class="n">batch_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_batches</span><span class="p">):</span>
-                <span class="c1"># Get just minibatch amount of data</span>
-                <span class="n">idxs_i</span> <span class="o">=</span> <span class="n">batch_idxs</span><span class="p">[</span><span class="n">batch_i</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">:(</span><span class="n">batch_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">]</span>
-
-                <span class="c1"># Create the feed for the batch data</span>
-                <span class="n">feed</span> <span class="o">=</span> <span class="n">feed_dict</span><span class="o">=</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_data</span><span class="p">:</span> <span class="n">input_data</span><span class="p">[</span><span class="n">idxs_i</span><span class="p">]}</span>
-
-                <span class="c1"># Run the training step</span>
-                <span class="p">(</span><span class="n">rec_cost</span><span class="p">,</span> <span class="n">new_params</span><span class="p">,</span> <span class="n">updates</span><span class="p">,</span> <span class="n">h_means</span><span class="p">)</span> <span class="o">=</span> <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">train_op</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="n">feed</span><span class="p">)</span>
-
-                <span class="c1"># Add up the cost</span>
-                <span class="n">epoch_cost</span> <span class="o">+=</span> <span class="n">rec_cost</span>
-                <span class="n">epoch_h_means</span> <span class="o">+=</span> <span class="n">h_means</span>
-            
-            <span class="n">epoch_cost</span> <span class="o">=</span> <span class="n">epoch_cost</span><span class="o">/</span><span class="n">n_batches</span>
-            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Epoch </span><span class="si">%i</span><span class="s1"> / </span><span class="si">%i</span><span class="s1"> | cost = </span><span class="si">%f</span><span class="s1"> | lr = </span><span class="si">%f</span><span class="s1"> | momentum = </span><span class="si">%f</span><span class="s1"> | sparse cost = </span><span class="si">%f</span><span class="s1">&#39;</span><span class="o">%</span>
-                 <span class="p">(</span><span class="n">epoch</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">training_epochs</span><span class="p">,</span> <span class="n">epoch_cost</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">,</span> <span class="n">momentum</span><span class="p">,</span> <span class="n">sparse_cost</span><span class="p">))</span>
-            
-        <span class="c1"># save_path = saver.save(sess, &#39;%s%s_model.ckpt&#39; % (snapshot_dir, self.name))</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">sess</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">sess</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">sess</span><span class="p">)</span></div></div>
 </pre></div>
 
+           </div>
+           <div class="articleComments">
+            
            </div>
           </div>
           <footer>
@@ -626,7 +460,8 @@
             VERSION:'0.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
         };
     </script>
       <script type="text/javascript" src="../../../_static/jquery.js"></script>

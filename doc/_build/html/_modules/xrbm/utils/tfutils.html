@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -40,6 +42,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -80,7 +83,10 @@
           
             
             
-                <p class="caption"><span class="caption-text">Contents:</span></p>
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../rbm.html">Restricted Boltzmann Machine (RBM)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../crbm.html">Conditional Restricted Boltzmann Machine (CRBM)</a></li>
@@ -99,8 +105,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../../index.html">xRBM Library</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">xRBM Library</a>
+        
       </nav>
 
 
@@ -113,39 +121,58 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      
-    <li>xrbm.utils.tfutils</li>
+        
+      <li>xrbm.utils.tfutils</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
   <h1>Source code for xrbm.utils.tfutils</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="kn">as</span> <span class="nn">tf</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <div class="viewcode-block" id="weight_variable"><a class="viewcode-back" href="../../../xrbm.utils.html#xrbm.utils.tfutils.weight_variable">[docs]</a><span class="k">def</span> <span class="nf">weight_variable</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;weight&#39;</span><span class="p">):</span>
-    <span class="c1"># initial = tf.truncated_normal(shape, stddev=0.1) #TODO: right choice?</span>
+    <span class="n">initial</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">truncated_normal</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span> <span class="c1">#TODO: right choice?</span>
     <span class="c1"># return tf.Variable(initial, name=name)</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
-                           <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">truncated_normal_initializer</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="mf">0.0005</span><span class="p">))</span> </div>
-                        <span class="c1">#    initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.001 * np.sqrt(6. / (shape[0] + shape[1]))))</span>
+                        <span class="c1">#    initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1) </span>
+                           <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">truncated_normal_initializer</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">stddev</span><span class="o">=</span><span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">6.</span> <span class="o">/</span> <span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+                        <span class="c1">#    initializer = initial</span>
+                           <span class="p">)</span></div>
 
-<div class="viewcode-block" id="bias_variable"><a class="viewcode-back" href="../../../xrbm.utils.html#xrbm.utils.tfutils.bias_variable">[docs]</a><span class="k">def</span> <span class="nf">bias_variable</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;bias&#39;</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)):</span>  
+<div class="viewcode-block" id="bias_variable"><a class="viewcode-back" href="../../../xrbm.utils.html#xrbm.utils.tfutils.bias_variable">[docs]</a><span class="k">def</span> <span class="nf">bias_variable</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;bias&#39;</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  
     <span class="c1"># initial = tf.constant(0.1, shape=shape)</span>
     <span class="c1"># return tf.Variable(initial, name=name)</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">initializer</span><span class="o">=</span><span class="n">initializer</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="data_variable"><a class="viewcode-back" href="../../../xrbm.utils.html#xrbm.utils.tfutils.data_variable">[docs]</a><span class="k">def</span> <span class="nf">data_variable</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;input_data&#39;</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">placeholder</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
@@ -153,11 +180,14 @@
 
 <div class="viewcode-block" id="sample_bernoulli"><a class="viewcode-back" href="../../../xrbm.utils.html#xrbm.utils.tfutils.sample_bernoulli">[docs]</a><span class="k">def</span> <span class="nf">sample_bernoulli</span><span class="p">(</span><span class="n">means</span><span class="p">,</span> <span class="n">n</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>    
     <span class="k">if</span> <span class="n">n</span><span class="o">==-</span><span class="mi">1</span><span class="p">:</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">means</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">means</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="p">,</span> <span class="n">means</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="mi">1</span><span class="p">]]</span> <span class="c1">#[n, means.get_shape()[1]]</span>
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">means</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> 
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">means</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> 
                                   <span class="n">tf</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span> 
                                   <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span></div>
+
+<span class="k">def</span> <span class="nf">_sample_bernoulli</span><span class="p">(</span><span class="n">means</span><span class="p">,</span> <span class="n">n</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">means</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">random_uniform</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">means</span><span class="p">))))</span>
 
 <span class="c1"># def sample_bernoulli(means, n):</span>
 <span class="c1">#     rand = np.random.rand(n, means.get_shape().as_list()[1])    </span>
@@ -165,6 +195,9 @@
     
 </pre></div>
 
+           </div>
+           <div class="articleComments">
+            
            </div>
           </div>
           <footer>
@@ -199,7 +232,8 @@
             VERSION:'0.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
         };
     </script>
       <script type="text/javascript" src="../../../_static/jquery.js"></script>

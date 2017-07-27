@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -42,6 +44,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -82,7 +85,10 @@
           
             
             
-                <p class="caption"><span class="caption-text">Contents:</span></p>
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="rbm.html">Restricted Boltzmann Machine (RBM)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crbm.html">Conditional Restricted Boltzmann Machine (CRBM)</a></li>
@@ -116,8 +122,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">xRBM Library</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">xRBM Library</a>
+        
       </nav>
 
 
@@ -126,25 +134,42 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
           <li><a href="xrbm.html">xrbm package</a> &raquo;</li>
-      
-    <li>xrbm.models package</li>
+        
+      <li>xrbm.models package</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/xrbm.models.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -159,7 +184,7 @@
 <span id="xrbm-models-abstract-model-module"></span><h2>xrbm.models.abstract_model module<a class="headerlink" href="#module-xrbm.models.abstract_model" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="xrbm.models.abstract_model.AbstractRBM">
-<em class="property">class </em><code class="descclassname">xrbm.models.abstract_model.</code><code class="descname">AbstractRBM</code><span class="sig-paren">(</span><em>num_vis</em>, <em>num_hid</em>, <em>vis_type='binary'</em>, <em>activation=&lt;function sigmoid&gt;</em>, <em>name='xRBM'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/abstract_model.html#AbstractRBM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.abstract_model.AbstractRBM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">xrbm.models.abstract_model.</code><code class="descname">AbstractRBM</code><span class="sig-paren">(</span><em>num_vis</em>, <em>num_hid</em>, <em>vis_type='binary'</em>, <em>activation=&lt;function sigmoid&gt;</em>, <em>initializer=&lt;function variance_scaling_initializer.&lt;locals&gt;._initializer&gt;</em>, <em>name='xRBM'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/abstract_model.html#AbstractRBM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.abstract_model.AbstractRBM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Abstract Class for xRBM Models</p>
 <dl class="method">
@@ -172,11 +197,11 @@
 </div>
 <div class="section" id="module-xrbm.models.crbm">
 <span id="xrbm-models-crbm-module"></span><h2>xrbm.models.crbm module<a class="headerlink" href="#module-xrbm.models.crbm" title="Permalink to this headline">¶</a></h2>
-<p>CRestricted Boltzmann Machines (CRBM) Implementation in Tensorflow</p>
+<p>Conditional Restricted Boltzmann Machines (CRBM) Implementation in Tensorflow</p>
 <dl class="class">
 <dt id="xrbm.models.crbm.CRBM">
-<em class="property">class </em><code class="descclassname">xrbm.models.crbm.</code><code class="descname">CRBM</code><span class="sig-paren">(</span><em>num_vis</em>, <em>num_cond</em>, <em>num_hid</em>, <em>vis_type='binary'</em>, <em>activation=&lt;function sigmoid&gt;</em>, <em>name='CRBM'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#xrbm.models.abstract_model.AbstractRBM" title="xrbm.models.abstract_model.AbstractRBM"><code class="xref py py-class docutils literal"><span class="pre">xrbm.models.abstract_model.AbstractRBM</span></code></a></p>
+<em class="property">class </em><code class="descclassname">xrbm.models.crbm.</code><code class="descname">CRBM</code><span class="sig-paren">(</span><em>num_vis</em>, <em>num_cond</em>, <em>num_hid</em>, <em>vis_type='binary'</em>, <em>activation=&lt;function sigmoid&gt;</em>, <em>initializer=&lt;function variance_scaling_initializer.&lt;locals&gt;._initializer&gt;</em>, <em>name='CRBM'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Conditional Restricted Boltzmann Machines (CRBM)</p>
 <dl class="method">
 <dt id="xrbm.models.crbm.CRBM.create_placeholders_variables">
@@ -210,7 +235,7 @@
 
 <dl class="method">
 <dt id="xrbm.models.crbm.CRBM.get_cost">
-<code class="descname">get_cost</code><span class="sig-paren">(</span><em>v_sample</em>, <em>cond</em>, <em>chain_end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.get_cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.get_cost" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_cost</code><span class="sig-paren">(</span><em>v_sample</em>, <em>chain_end</em>, <em>in_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.get_cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.get_cost" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the free-energy cost between two data tensors, used for calcuating the gradients</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -235,7 +260,7 @@
 
 <dl class="method">
 <dt id="xrbm.models.crbm.CRBM.get_reconstruction_cost">
-<code class="descname">get_reconstruction_cost</code><span class="sig-paren">(</span><em>input_data</em>, <em>recon_means</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.get_reconstruction_cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.get_reconstruction_cost" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_reconstruction_cost</code><span class="sig-paren">(</span><em>vis_data</em>, <em>cond_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.get_reconstruction_cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.get_reconstruction_cost" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the reconstruction cost between input data and reconstructed data</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -259,7 +284,7 @@
 
 <dl class="method">
 <dt id="xrbm.models.crbm.CRBM.gibbs_sample_hvh">
-<code class="descname">gibbs_sample_hvh</code><span class="sig-paren">(</span><em>h_samples0</em>, <em>cond</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.gibbs_sample_hvh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.gibbs_sample_hvh" title="Permalink to this definition">¶</a></dt>
+<code class="descname">gibbs_sample_hvh</code><span class="sig-paren">(</span><em>h_samples0</em>, <em>cond</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.gibbs_sample_hvh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.gibbs_sample_hvh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs a cycle of gibbs sampling, started with an initial hidden units activations</p>
 <p>Used for training</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -287,7 +312,7 @@
 
 <dl class="method">
 <dt id="xrbm.models.crbm.CRBM.gibbs_sample_hvh_condcont">
-<code class="descname">gibbs_sample_hvh_condcont</code><span class="sig-paren">(</span><em>h_samples0</em>, <em>condontA</em>, <em>condontB</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.gibbs_sample_hvh_condcont"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.gibbs_sample_hvh_condcont" title="Permalink to this definition">¶</a></dt>
+<code class="descname">gibbs_sample_hvh_condcont</code><span class="sig-paren">(</span><em>h_samples0</em>, <em>condontA</em>, <em>condontB</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.gibbs_sample_hvh_condcont"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.gibbs_sample_hvh_condcont" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs a cycle of gibbs sampling, started with an initial hidden units activations</p>
 <p>Uses pre-computed contributions from condition units to both hidden and visible units</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -316,7 +341,7 @@
 
 <dl class="method">
 <dt id="xrbm.models.crbm.CRBM.gibbs_sample_vhv">
-<code class="descname">gibbs_sample_vhv</code><span class="sig-paren">(</span><em>v_samples0</em>, <em>cond</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.gibbs_sample_vhv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.gibbs_sample_vhv" title="Permalink to this definition">¶</a></dt>
+<code class="descname">gibbs_sample_vhv</code><span class="sig-paren">(</span><em>v_samples0</em>, <em>in_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.gibbs_sample_vhv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.gibbs_sample_vhv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Runs a cycle of gibbs sampling, started with an initial visible and condition units configurations</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -342,39 +367,8 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="xrbm.models.crbm.CRBM.inference">
-<code class="descname">inference</code><span class="sig-paren">(</span><em>input_data</em>, <em>cond_data</em>, <em>cd_k=1</em>, <em>sparse_target=0</em>, <em>sparse_cost=0</em>, <em>sparse_decay=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.inference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.inference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the tensorflow operations for inference</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_data</strong> (<em>tensor</em>) &#8211; the input (batch) data tensor</li>
-<li><strong>cond_data</strong> (<em>tensor</em>) &#8211; the condition data tensor</li>
-<li><strong>cd_k=1</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>v_probs_means</strong> (<em>tensor</em>) &#8211; a tensor containing the mean probabilities of the visible units</li>
-<li><strong>chain_end</strong> (<em>tensor</em>) &#8211; the last visible samples generated in the gibbs cycles</li>
-<li><strong>sparse_grad</strong> (<em>tensor</em>) &#8211; the sparisity gradients</li>
-<li><strong>current_activations_mean_props</strong> (<em>tensor</em>) &#8211; the mean activation of the hidden units</li>
-</ul>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="xrbm.models.crbm.CRBM.make_prediction">
-<code class="descname">make_prediction</code><span class="sig-paren">(</span><em>cond</em>, <em>init</em>, <em>num_gibbs=20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.make_prediction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.make_prediction" title="Permalink to this definition">¶</a></dt>
+<dt id="xrbm.models.crbm.CRBM.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>cond</em>, <em>init</em>, <em>num_gibbs=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate (predict) the visible units configuration given the conditions</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -400,7 +394,7 @@
 
 <dl class="method">
 <dt id="xrbm.models.crbm.CRBM.sample_h_from_vc">
-<code class="descname">sample_h_from_vc</code><span class="sig-paren">(</span><em>visible</em>, <em>cond</em>, <em>n=-1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.sample_h_from_vc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.sample_h_from_vc" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sample_h_from_vc</code><span class="sig-paren">(</span><em>visible</em>, <em>cond</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.sample_h_from_vc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.sample_h_from_vc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a sample of hidden units, given a tensor of visible and condition units configuations</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -426,7 +420,7 @@
 
 <dl class="method">
 <dt id="xrbm.models.crbm.CRBM.sample_v_from_hc">
-<code class="descname">sample_v_from_hc</code><span class="sig-paren">(</span><em>hidden</em>, <em>cond</em>, <em>n=-1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.sample_v_from_hc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.sample_v_from_hc" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sample_v_from_hc</code><span class="sig-paren">(</span><em>hidden</em>, <em>cond</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.sample_v_from_hc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.sample_v_from_hc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a sample of visible units, given a tensor of hidden and condition units configuations</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -450,78 +444,6 @@
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="xrbm.models.crbm.CRBM.train">
-<code class="descname">train</code><span class="sig-paren">(</span><em>sess</em>, <em>input_data</em>, <em>cond_data</em>, <em>training_epochs</em>, <em>batch_size=100</em>, <em>learning_rate=0.1</em>, <em>snapshot_dir='./logs/'</em>, <em>snapshot_freq=0</em>, <em>cd_k=1</em>, <em>momentum=0</em>, <em>wdecay=0</em>, <em>sparse_target=0</em>, <em>sparse_cost=0</em>, <em>sparse_decay=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates mini-batches and trains the CRBM for the given number of epochs</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_data</strong> (<em>tensor</em>) &#8211; the input data tensor</li>
-<li><strong>cond_data</strong> (<em>tensor</em>) &#8211; the condition data tensor</li>
-<li><strong>training_epochs</strong> (<em>float</em>) &#8211; the number of training epochs</li>
-<li><strong>batch_size</strong> (<em>int</em>) &#8211; the size of each mini batch</li>
-<li><strong>learning_rate</strong> (<em>float, default 0.1</em>) &#8211; the learning rate</li>
-<li><strong>snapshot_dir</strong> (<em>string, default logs</em>) &#8211; the directory to store model snapshots and logs</li>
-<li><strong>snapshot_freq</strong> (<em>int, default 100</em>) &#8211; the frequency of the epochs to save a model snapshot</li>
-<li><strong>cd_k</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>momentum</strong> (<em>float, default 0</em>) &#8211; the momentum value</li>
-<li><strong>wdecay</strong> (<em>float, default 0</em>) &#8211; the weight decay value</li>
-<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>W</strong> (<em>array_like</em>) &#8211; the numpy visble-hidden weight matrix</li>
-<li><strong>A</strong> (<em>array_like</em>) &#8211; the numpy condition to visible weight matrix</li>
-<li><strong>B</strong> (<em>array_like</em>) &#8211; the numpy condition to hidden weight matrix</li>
-<li><strong>vbias</strong> (<em>array_like</em>) &#8211; the numpy visible biases</li>
-<li><strong>hbias</strong> (<em>array_like</em>) &#8211; the numpy hidden biases</li>
-</ul>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="xrbm.models.crbm.CRBM.train_step">
-<code class="descname">train_step</code><span class="sig-paren">(</span><em>visible_data</em>, <em>cond_data</em>, <em>learning_rate</em>, <em>momentum=0</em>, <em>wdecay=0</em>, <em>cd_k=1</em>, <em>sparse_target=0</em>, <em>sparse_cost=0</em>, <em>sparse_decay=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/crbm.html#CRBM.train_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.crbm.CRBM.train_step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the operations needed for a training step of a CRBM</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>visible_data</strong> (<em>tensor</em>) &#8211; the input (batch) data tensor</li>
-<li><strong>cond_data</strong> (<em>tensor</em>) &#8211; the condition data tensor</li>
-<li><strong>learning_rate</strong> (<em>float</em>) &#8211; the learning rate</li>
-<li><strong>momentum</strong> (<em>float, default 0</em>) &#8211; the momentum value</li>
-<li><strong>wdecay</strong> (<em>float, default 0</em>) &#8211; the weight decay value</li>
-<li><strong>cd_k</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>rec_cost</strong> (<em>float</em>) &#8211; the reconstruction cost for this step</li>
-<li><strong>new_params</strong> (<em>list of tensors</em>) &#8211; the updated model parameters</li>
-<li><strong>updates</strong> (<em>list of tensors</em>) &#8211; the value of updates for each model parameter</li>
-</ul>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -530,8 +452,8 @@
 <p>Restricted Boltzmann Machines (RBM) Implementation in Tensorflow</p>
 <dl class="class">
 <dt id="xrbm.models.rbm.RBM">
-<em class="property">class </em><code class="descclassname">xrbm.models.rbm.</code><code class="descname">RBM</code><span class="sig-paren">(</span><em>num_vis</em>, <em>num_hid</em>, <em>vis_type='binary'</em>, <em>activation=&lt;function sigmoid&gt;</em>, <em>name='RBM'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/rbm.html#RBM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.rbm.RBM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#xrbm.models.abstract_model.AbstractRBM" title="xrbm.models.abstract_model.AbstractRBM"><code class="xref py py-class docutils literal"><span class="pre">xrbm.models.abstract_model.AbstractRBM</span></code></a></p>
+<em class="property">class </em><code class="descclassname">xrbm.models.rbm.</code><code class="descname">RBM</code><span class="sig-paren">(</span><em>num_vis</em>, <em>num_hid</em>, <em>vis_type='binary'</em>, <em>activation=&lt;function sigmoid&gt;</em>, <em>initializer=&lt;function variance_scaling_initializer.&lt;locals&gt;._initializer&gt;</em>, <em>name='RBM'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/rbm.html#RBM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.rbm.RBM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Restricted Boltzmann Machines (RBM)</p>
 <dl class="method">
 <dt id="xrbm.models.rbm.RBM.create_placeholders_variables">
@@ -559,7 +481,7 @@
 
 <dl class="method">
 <dt id="xrbm.models.rbm.RBM.get_cost">
-<code class="descname">get_cost</code><span class="sig-paren">(</span><em>v_sample</em>, <em>chain_end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/rbm.html#RBM.get_cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.rbm.RBM.get_cost" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_cost</code><span class="sig-paren">(</span><em>v_sample</em>, <em>chain_end</em>, <em>in_data=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/rbm.html#RBM.get_cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.rbm.RBM.get_cost" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the free-energy cost between two data tensors, used for calcuating the gradients</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -583,7 +505,7 @@
 
 <dl class="method">
 <dt id="xrbm.models.rbm.RBM.get_reconstruction_cost">
-<code class="descname">get_reconstruction_cost</code><span class="sig-paren">(</span><em>input_data</em>, <em>recon_means</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/rbm.html#RBM.get_reconstruction_cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.rbm.RBM.get_reconstruction_cost" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_reconstruction_cost</code><span class="sig-paren">(</span><em>input_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/rbm.html#RBM.get_reconstruction_cost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.rbm.RBM.get_reconstruction_cost" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the reconstruction cost between input data and reconstructed data</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -628,47 +550,20 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="xrbm.models.rbm.RBM.inference">
-<code class="descname">inference</code><span class="sig-paren">(</span><em>input_data</em>, <em>cd_k=1</em>, <em>sparse_target=0</em>, <em>sparse_cost=0</em>, <em>sparse_decay=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/rbm.html#RBM.inference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.rbm.RBM.inference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the tensorflow operations for inference</p>
+<dt id="xrbm.models.rbm.RBM.gibbs_sample_vhv">
+<code class="descname">gibbs_sample_vhv</code><span class="sig-paren">(</span><em>v_samples0</em>, <em>*data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/rbm.html#RBM.gibbs_sample_vhv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.rbm.RBM.gibbs_sample_vhv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs a cycle of gibbs sampling, started with an initial hidden units activations</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_data</strong> (<em>tensor</em>) &#8211; the input (batch) data tensor</li>
-<li><strong>cd_k=1</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>v_samples0</strong> (<em>tensor</em>) &#8211; a tensor of visible units values</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>v_probs_means</strong> (<em>tensor</em>) &#8211; a tensor containing the mean probabilities of the visible units</li>
-<li><strong>chain_end</strong> (<em>tensor</em>) &#8211; the last visible samples generated in the gibbs cycles</li>
-<li><strong>sparse_grad</strong> (<em>tensor</em>) &#8211; the sparisity gradients</li>
-<li><strong>current_activations_mean_props</strong> (<em>tensor</em>) &#8211; the mean activation of the hidden units</li>
-</ul>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="xrbm.models.rbm.RBM.load_model_params">
-<code class="descname">load_model_params</code><span class="sig-paren">(</span><em>_W</em>, <em>_vbias</em>, <em>_hbias</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/rbm.html#RBM.load_model_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.rbm.RBM.load_model_params" title="Permalink to this definition">¶</a></dt>
-<dd><p>Loads the model parameters from Numpy arrays</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>_W</strong> (<em>array_like</em>) &#8211; The weight matrix</li>
-<li><strong>_vbias</strong> (<em>array_like</em>) &#8211; The visible biases</li>
-<li><strong>_hbias</strong> (<em>array_like</em>) &#8211; The hidden biases</li>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>v_probs_means</strong> (<em>tensor</em>)</li>
+<li><strong>v_samples</strong> (<em>tensor</em>) &#8211; visible samples</li>
+<li><strong>h_probs_means</strong> (<em>tensor</em>) &#8211; a tensor containing the mean probabilities of the hidden units activations</li>
+<li><strong>h_samples</strong> (<em>tensor</em>) &#8211; a tensor containing a bernoulli sample generated from the mean activations</li>
 </ul>
 </td>
 </tr>
@@ -718,74 +613,6 @@
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="xrbm.models.rbm.RBM.train">
-<code class="descname">train</code><span class="sig-paren">(</span><em>sess</em>, <em>input_data</em>, <em>training_epochs</em>, <em>batch_size=100</em>, <em>learning_rate=0.1</em>, <em>snapshot_dir='./logs/'</em>, <em>snapshot_freq=100</em>, <em>cd_k=1</em>, <em>momentum=0</em>, <em>wdecay=0</em>, <em>sparse_target=0</em>, <em>sparse_cost=0</em>, <em>sparse_decay=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/rbm.html#RBM.train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.rbm.RBM.train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates mini-batches and trains the RBM for the given number of epochs</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_data</strong> (<em>tensor</em>) &#8211; the input data tensor</li>
-<li><strong>training_epochs</strong> (<em>float</em>) &#8211; the number of training epochs</li>
-<li><strong>batch_size</strong> (<em>int</em>) &#8211; the size of each mini batch</li>
-<li><strong>learning_rate</strong> (<em>float, default 0.1</em>) &#8211; the learning rate</li>
-<li><strong>snapshot_dir</strong> (<em>string, default logs</em>) &#8211; the directory to store model snapshots and logs</li>
-<li><strong>snapshot_freq</strong> (<em>int, default 100</em>) &#8211; the frequency of the epochs to save a model snapshot</li>
-<li><strong>cd_k</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>momentum</strong> (<em>float, default 0</em>) &#8211; the momentum value</li>
-<li><strong>wdecay</strong> (<em>float, default 0</em>) &#8211; the weight decay value</li>
-<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>W</strong> (<em>array_like</em>) &#8211; the numpy weight matrix</li>
-<li><strong>vbias</strong> (<em>array_like</em>) &#8211; the numpy visible biases</li>
-<li><strong>hbias</strong> (<em>array_like</em>) &#8211; the numpy hidden biases</li>
-</ul>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="xrbm.models.rbm.RBM.train_step">
-<code class="descname">train_step</code><span class="sig-paren">(</span><em>visible_data</em>, <em>learning_rate</em>, <em>momentum=0</em>, <em>wdecay=0</em>, <em>cd_k=1</em>, <em>sparse_target=0</em>, <em>sparse_cost=0</em>, <em>sparse_decay=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/xrbm/models/rbm.html#RBM.train_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#xrbm.models.rbm.RBM.train_step" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the operations needed for a training step of an RBM</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>visible_data</strong> (<em>tensor</em>) &#8211; the input (batch) data tensor</li>
-<li><strong>learning_rate</strong> (<em>float</em>) &#8211; the learning rate</li>
-<li><strong>momentum</strong> (<em>float, default 0</em>) &#8211; the momentum value</li>
-<li><strong>wdecay</strong> (<em>float, default 0</em>) &#8211; the weight decay value</li>
-<li><strong>cd_k</strong> (<em>int, default 1</em>) &#8211; the number of CD steps for gibbs sampling</li>
-<li><strong>sparse_target</strong> (<em>float, default 0</em>) &#8211; the sparsity target</li>
-<li><strong>sparse_cost</strong> (<em>float, default 0</em>) &#8211; the sparsity cost</li>
-<li><strong>sparse_decay</strong> (<em>float, default 0</em>) &#8211; the sparsity weight decay</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>rec_cost</strong> (<em>float</em>) &#8211; the reconstruction cost for this step</li>
-<li><strong>new_params</strong> (<em>list of tensors</em>) &#8211; the updated model parameters</li>
-<li><strong>updates</strong> (<em>list of tensors</em>) &#8211; the value of updates for each model parameter</li>
-</ul>
-</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -796,15 +623,18 @@
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="xrbm.utils.html" class="btn btn-neutral float-right" title="xrbm.utils package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="xrbm.utils.html" class="btn btn-neutral float-right" title="xrbm.utils package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="xrbm.html" class="btn btn-neutral" title="xrbm package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="xrbm.html" class="btn btn-neutral" title="xrbm package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -838,7 +668,8 @@
             VERSION:'0.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

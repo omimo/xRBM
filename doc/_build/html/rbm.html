@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -41,6 +43,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -81,7 +84,10 @@
           
             
             
-                <p class="caption"><span class="caption-text">Contents:</span></p>
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Restricted Boltzmann Machine (RBM)</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
@@ -112,8 +118,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">xRBM Library</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">xRBM Library</a>
+        
       </nav>
 
 
@@ -122,23 +130,40 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Restricted Boltzmann Machine (RBM)</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Restricted Boltzmann Machine (RBM)</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/rbm.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -151,7 +176,7 @@
 <p>Restricted Boltzmann Machine (RBM) is a type of energy-based, generative, stochastic artificial nerual network.
 It is energy-based beacuse it associates a scalar value to each state of the model. The learning then can be defined
 as finding an energy function that assigned the desired configurations a low-energy value.
-RBM is generative beacuse it learns a probabilistic model of all of the variables.
+RBM is generative beacuse it learns a probability distribution that fits the training data as well as possible.
 It is a stochastic network beacuse its units use a stochastic activation function, which work by introducing noise to the data.
 RBM was introduced by Paul Smolensky in 1986, but was later become widely used after Geoffrey Hinton and his team
 introduced sucsseful applications of RBM.</p>
@@ -194,8 +219,6 @@ introduced sucsseful applications of RBM.</p>
 <div class="section" id="api">
 <h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
-<ul class="simple">
-</ul>
 </div>
 </div>
 <div class="section" id="references">
@@ -205,15 +228,18 @@ introduced sucsseful applications of RBM.</p>
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="crbm.html" class="btn btn-neutral float-right" title="Conditional Restricted Boltzmann Machine (CRBM)" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="crbm.html" class="btn btn-neutral float-right" title="Conditional Restricted Boltzmann Machine (CRBM)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="xRBM Library" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="xRBM Library" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -247,7 +273,8 @@ introduced sucsseful applications of RBM.</p>
             VERSION:'0.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: ''
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>

@@ -7,7 +7,6 @@ import numpy as np
 import scipy.io as sio
 from xrbm.utils import tfutils
 from xrbm.utils import costs as costs
-from .abstract_model import AbstractRBM
 
 class CRBM():
     'Conditional Restricted Boltzmann Machines (CRBM)'
@@ -84,7 +83,7 @@ class CRBM():
 
             self.model_params = [self.W, self.A, self.B, self.vbias, self.hbias]
 
-    def sample_h_from_vc(self, visible, cond, n=-1): 
+    def sample_h_from_vc(self, visible, cond): 
         """
         Get a sample of hidden units, given a tensor of visible and condition units configuations
 
@@ -113,11 +112,11 @@ class CRBM():
                          self.hbias) # static hidden biases
 
             h_probs_means = self.activation(bottom_up)
-            h_samples = tfutils.sample_bernoulli(h_probs_means, n)
+            h_samples = tfutils.sample_bernoulli(h_probs_means)
 
         return bottom_up, h_probs_means, h_samples
 
-    def sample_v_from_hc(self, hidden, cond, n=-1):
+    def sample_v_from_hc(self, hidden, cond):
         """
         Get a sample of visible units, given a tensor of hidden and condition units configuations
 
@@ -148,7 +147,7 @@ class CRBM():
             v_probs_means = self.activation(contributions)
 
             if self.vis_type == 'binary':                
-                v_samples = tfutils.sample_bernoulli(v_probs_means, n)
+                v_samples = tfutils.sample_bernoulli(v_probs_means)
             elif self.vis_type == 'gaussian':
                 v_samples = contributions # using means instead of sampling, as in Taylor et al
 
@@ -354,7 +353,7 @@ class CRBM():
 
         return tf.transpose(tf.transpose(v) + tf.transpose(h))        
     
-    def predict(self, cond, init,  num_gibbs=20):
+    def predict(self, cond, init,  num_gibbs=2):
         """
         Generate (predict) the visible units configuration given the conditions
 
@@ -381,7 +380,7 @@ class CRBM():
             init = sample
         
         # mean-field approximation as suggested by Taylor
-        _, vmean, sample = self.sample_v_from_hc(hmean, cond, 1)
+        _, vmean, sample = self.sample_v_from_hc(hmean, cond)
 
         return sample, hsample
 
