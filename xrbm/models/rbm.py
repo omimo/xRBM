@@ -7,13 +7,14 @@ import tensorflow as tf
 import numpy as np
 from xrbm.utils import tfutils
 from xrbm.utils import costs as costs
-from .abstract_model import AbstractRBM
 
-class RBM(AbstractRBM):
+class RBM():
     'Restricted Boltzmann Machines (RBM)'
 
     def __init__(self, num_vis, num_hid, vis_type='binary',
-                 activation=tf.nn.sigmoid,  name='RBM'):
+                 activation=tf.nn.sigmoid,  
+                 initializer=tf.contrib.layers.variance_scaling_initializer(), # He Init
+                 name='RBM'):
         """
         The RBM Constructor
 
@@ -30,8 +31,15 @@ class RBM(AbstractRBM):
         name:          string
             the name of the object (used for Tensorflow's scope)
         """
-        super(RBM, self).__init__(num_vis, num_hid, vis_type, activation, name)
 
+        # Model Param
+        self.num_vis = num_vis
+        self.num_hid = num_hid
+        self.vis_type = vis_type
+        self.name = name
+        self.activation = activation
+        self.initializer = initializer
+        
         # Weights
         self.W = None
 
@@ -41,9 +49,6 @@ class RBM(AbstractRBM):
 
         # Learning params
         self.model_params = None
-        self.wu = None
-        self.vbu = None
-        self.hbu = None
 
         with tf.variable_scope(self.name):
             self.create_placeholders_variables()
@@ -52,48 +57,16 @@ class RBM(AbstractRBM):
         """
         Creates the TF placeholders and variables used by the object
         """
-        with tf.variable_scope(self.name):
-            self.sp_hidden_means = tf.get_variable(name='sp_hidden_means',
-                                                   shape=[self.num_hid],
-                                                   initializer=tf.constant_initializer(0))
-
-            self.batch_data = tfutils.data_variable((None, self.num_vis),'batch_data')
-
         with tf.variable_scope('params'):
-            self.W = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
+            self.W = tf.get_variable(shape=[self.num_vis, self.num_hid], 
+                                     initializer=self.initializer,
+                                     name='main_weights')
+            #self.W = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
             self.vbias = tfutils.bias_variable([self.num_vis], 'vbias')
             self.hbias = tfutils.bias_variable([self.num_hid], 'hbias')
 
             self.model_params = [self.W, self.vbias, self.hbias]
 
-        with tf.variable_scope('updates'):
-            self.wu = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
-            self.vbu = tfutils.bias_variable([self.num_vis], 'vbias')
-            self.hbu = tfutils.bias_variable([self.num_hid], 'hbias')           
-
-    def load_model_params(self, _W, _vbias, _hbias):
-        """
-        Loads the model parameters from Numpy arrays
-
-        Parameters
-        ----------
-        _W:     array_like
-            The weight matrix
-        _vbias: array_like
-            The visible biases
-        _hbias: array_like
-            The hidden biases 
-        """
-        with tf.variable_scope(self.name):
-            with tf.variable_scope('params'):
-                self.W = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights') #TODO: add reuse parameter
-                self.vbias = tfutils.bias_variable([self.num_vis], 'vbias')
-                self.hbias = tfutils.bias_variable([self.num_hid], 'hbias')
-
-                self.model_params = [self.W, self.vbias, self.hbias]
-                self.W.assign(_W)
-                self.vbias.assign(_vbias)
-                self.hbias.assign(_hbias)
 
     def sample_h_from_v(self, visible, n=-1):
         """
@@ -185,125 +158,39 @@ class RBM(AbstractRBM):
 
         return v_probs_means, v_samples, h_probs_means, h_samples
 
-    def inference(self, input_data, cd_k=1, sparse_target=0, sparse_cost=0, sparse_decay=0):
+    def gibbs_sample_vhv(self, v_samples0, *data):    
         """
-        Defines the tensorflow operations for inference
+        Runs a cycle of gibbs sampling, started with an initial hidden units activations
 
         Parameters
         ----------
-        input_data:     tensor
-            the input (batch) data tensor
-        cd_k=1:         int, default 1
-            the number of CD steps for gibbs sampling
-        sparse_target:  float, default 0
-            the sparsity target
-        sparse_cost:    float, default 0
-            the sparsity cost
-        sparse_decay:   float, default 0
-            the sparsity weight decay
-
+        v_samples0:    tensor
+            a tensor of visible units values
+        
         Returns
         -------
         v_probs_means:  tensor
-            a tensor containing the mean probabilities of the visible units
-        chain_end:      tensor
-            the last visible samples generated in the gibbs cycles
-        sparse_grad:    tensor
-            the sparisity gradients
-        current_activations_mean_props:     tensor
-            the mean activation of the hidden units
+
+        v_samples:      tensor
+            visible samples
+        h_probs_means:  tensor
+            a tensor containing the mean probabilities of the hidden units activations
+        h_samples:      tensor
+            a tensor containing a bernoulli sample generated from the mean activations
         """
+        with tf.variable_scope('sampling_vhv'):
+            # h from v
+            bottom_up, h_probs_means, h_samples = self.sample_h_from_v(v_samples0, n=tf.shape(v_samples0)[0])
 
-        with tf.variable_scope('inference'):
-            ### positive phase
-            # bottom-up - initialze the network with training data
-            
-            _, h_probs_means1, h_samples1 = self.sample_h_from_v(input_data, n=self.batch_size)
+            # v from h
+            top_bottom, v_probs_means, v_samples = self.sample_v_from_h(h_samples, n=tf.shape(v_samples0)[0])
 
-            chain_data = h_samples1
 
-            # calculate the sparsity term
-            current_activations_mean_props = tf.reduce_mean(h_probs_means1, reduction_indices=0)
 
-            self.sp_hidden_means = sparse_decay * self.sp_hidden_means + (1 - sparse_decay) * current_activations_mean_props
-            sparse_grad = sparse_cost * (self.sp_hidden_means - sparse_target)
+        return v_probs_means, v_samples, h_probs_means, h_samples
 
-            for k in range(cd_k):
-                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh(chain_data)
-                chain_data = h_samples
 
-            ### update
-            chain_end = v_samples
-
-        return v_probs_means, chain_end, sparse_grad, current_activations_mean_props
-
-    def train_step(self, visible_data, learning_rate,
-                   momentum=0, wdecay=0, cd_k=1,
-                   sparse_target=0, sparse_cost=0, sparse_decay=0):
-        """
-        Defines the operations needed for a training step of an RBM
-
-        Parameters
-        ----------
-        visible_data:       tensor
-            the input (batch) data tensor
-        learning_rate:      float
-            the learning rate
-        momentum:           float, default 0
-            the momentum value
-        wdecay:             float, default 0
-            the weight decay value
-        cd_k:               int, default 1
-            the number of CD steps for gibbs sampling
-        sparse_target:  float, default 0
-            the sparsity target
-        sparse_cost:    float, default 0
-            the sparsity cost
-        sparse_decay:   float, default 0
-            the sparsity weight decay
-
-        Returns
-        -------
-        rec_cost:       float
-            the reconstruction cost for this step
-        new_params:     list of tensors
-            the updated model parameters
-        updates:        list of tensors
-            the value of updates for each model parameter
-        """
-        with tf.variable_scope('train_step'):
-            ## inference
-            chain_end_probs_means, chain_end, sparse_grad, current_activations_mean_props = self.inference(visible_data, cd_k,
-                                                        sparse_target, sparse_cost, sparse_decay)
-
-            ## update
-             # get the cost using free energy
-            cost = self.get_cost(visible_data, chain_end)
-
-             # calculate the gradients using tf
-            grad_params = tf.gradients(ys=cost, xs=self.model_params)
-
-             # compose the update values, incorporating weight decay, momentum, and sparsity terms
-            wu_ = self.wu.assign(momentum * self.wu + (grad_params[0] + sparse_grad - wdecay * self.W) * learning_rate)
-            vbu_ = self.vbu.assign(momentum * self.vbu + grad_params[1] * learning_rate)
-            hbu_ = self.hbu.assign(momentum * self.hbu + (grad_params[2] + sparse_grad) * learning_rate)
-
-            updates = [wu_, vbu_, hbu_]
-
-             # update the parameters
-            w_ = self.W.assign_sub(self.wu)
-            vb_ = self.vbias.assign_sub(self.vbu)
-            hb_ = self.hbias.assign_sub(self.hbu)
-
-             # we need to return the new params so that tf considers them in the graph
-            new_params = [w_, vb_, hb_]
-
-            ## evaluate the reconstruction capability of the model
-            rec_cost = self.get_reconstruction_cost(visible_data, chain_end_probs_means)
-
-        return rec_cost, new_params, updates, current_activations_mean_props #TODO: Remove
-
-    def get_cost(self, v_sample, chain_end):
+    def get_cost(self, v_sample, chain_end, in_data=[]):
         """
         Calculates the free-energy cost between two data tensors, used for calcuating the gradients
     
@@ -324,7 +211,7 @@ class RBM(AbstractRBM):
                     - self.free_energy(chain_end), reduction_indices=0)
         return cost
 
-    def get_reconstruction_cost(self, input_data, recon_means):
+    def get_reconstruction_cost(self, input_data):
         """
         Calculates the reconstruction cost between input data and reconstructed data
     
@@ -340,10 +227,13 @@ class RBM(AbstractRBM):
         cost:       float
             the reconstruction cost
         """        
+        recon_means,_,_,_ = self.gibbs_sample_vhv(input_data)
+
         # cost = costs.cross_entropy(input_data, recon_means)
         cost = costs.mse(input_data, recon_means)
         return cost
-
+    
+    
     def free_energy(self, v_sample): 
         """
         Calcuates the free-energy of a given visible tensor
@@ -372,87 +262,3 @@ class RBM(AbstractRBM):
         return tf.transpose(tf.transpose(v) + tf.transpose(h))        
 
 
-    def train(self, sess, input_data, training_epochs, batch_size=100, learning_rate=0.1,
-                    snapshot_dir='./logs/', snapshot_freq=100, cd_k=1,
-                    momentum=0, wdecay=0, sparse_target=0, sparse_cost=0, sparse_decay=0):
-        """
-        Creates mini-batches and trains the RBM for the given number of epochs
-
-        Parameters
-        ----------
-        input_data:         tensor
-            the input data tensor
-        training_epochs:    float
-            the number of training epochs
-        batch_size:         int
-            the size of each mini batch
-        learning_rate:      float, default 0.1
-            the learning rate
-        snapshot_dir:       string, default logs
-            the directory to store model snapshots and logs
-        snapshot_freq:      int, default 100
-            the frequency of the epochs to save a model snapshot
-        cd_k:               int, default 1
-            the number of CD steps for gibbs sampling
-        momentum:           float, default 0
-            the momentum value
-        wdecay:             float, default 0
-            the weight decay value
-        sparse_target:  float, default 0
-            the sparsity target
-        sparse_cost:    float, default 0
-            the sparsity cost
-        sparse_decay:   float, default 0
-            the sparsity weight decay
-
-        Returns
-        -------
-        W:      array_like
-            the numpy weight matrix
-        vbias:      array_like
-            the numpy visible biases
-        hbias:      array_like
-            the numpy hidden biases
-        """
-        self.batch_size = batch_size
-
-        # Make batches
-        batch_idxs = np.random.permutation(range(len(input_data)))
-        n_batches = len(batch_idxs) // batch_size
-        
-        # Define train ops            
-        train_op = self.train_step(self.batch_data, 
-                                   learning_rate, 
-                                   momentum, 
-                                   wdecay, 
-                                   cd_k=cd_k,
-                                   sparse_target=sparse_target, 
-                                   sparse_cost=sparse_cost, 
-                                   sparse_decay=sparse_decay)
- 
-        # Run everything in tf 
-        for epoch in range(training_epochs):
-            epoch_cost = 0
-            epoch_h_means = 0;
-
-            for batch_i in range(n_batches):
-                # Get just minibatch amount of data
-                idxs_i = batch_idxs[batch_i * batch_size:(batch_i + 1) * batch_size]
-
-                # Create the feed for the batch data
-                feed = feed_dict={self.batch_data: input_data[idxs_i]}
-
-                # Run the training step
-                (rec_cost, new_params, updates, h_means) = sess.run(train_op, feed_dict=feed)
-
-                # Add up the cost
-                epoch_cost += rec_cost
-                epoch_h_means += h_means
-            
-            epoch_cost = epoch_cost/n_batches
-            print('Epoch %i / %i | cost = %f | lr = %f | momentum = %f | sparse cost = %f'%
-                 (epoch+1, training_epochs, epoch_cost, learning_rate, momentum, sparse_cost))
-            
-        # save_path = saver.save(sess, '%s%s_model.ckpt' % (snapshot_dir, self.name))
-
-        return self.W.eval(session=sess), self.vbias.eval(session=sess), self.hbias.eval(session=sess)
