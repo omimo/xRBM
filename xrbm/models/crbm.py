@@ -267,7 +267,7 @@ class CRBM(AbstractRBM):
 
         return v_probs_means, v_samples, h_probs_means, h_samples
     
-    def gibbs_sample_vhv(self, v_samples0, cond):
+    def gibbs_sample_vhv(self, v_samples0, in_data):
         """
         Runs a cycle of gibbs sampling, started with an initial visible and condition units configurations
 
@@ -289,7 +289,8 @@ class CRBM(AbstractRBM):
             a tensor containing the mean probabilities of the hidden units activations
         h_samples:      tensor
             a tensor containing a bernoulli sample generated from the mean activations
-        """        
+        """
+        cond = in_data[0]
         with tf.variable_scope('sampling_vhv'):
             # h from v
             bottom_up, h_probs_means, h_samples = self.sample_h_from_vc(v_samples0, cond)
@@ -299,188 +300,7 @@ class CRBM(AbstractRBM):
         
         return v_probs_means, v_samples, h_probs_means, h_samples
 
-    def inference(self, input_data, cond_data, cd_k=1):
-        """
-        Defines the tensorflow operations for inference
-
-        Parameters
-        ----------
-        input_data:     tensor
-            the input (batch) data tensor
-        cond_data:      tensor
-            the condition data tensor
-        cd_k=1:         int, default 1
-            the number of CD steps for gibbs sampling
-
-        Returns
-        -------
-        v_probs_means:  tensor
-            a tensor containing the mean probabilities of the visible units
-        chain_end:      tensor
-            the last visible samples generated in the gibbs cycles
-        """
-
-        with tf.variable_scope('inference'):
-            ### positive phase
-            # bottom-up - initialze the network with training data
-            
-            _, h_probs_means1, h_samples1 = self.sample_h_from_vc(input_data, cond=cond_data)
-
-            chain_data = h_samples1
-
-
-            # v_samples = tf.stop_gradient(v_samples)
-
-#            condcontA = tf.matmul(cond_data, self.A)
-#            condcontB = tf.matmul(cond_data, self.B)
-            for k in range(cd_k): #TODO: this has to be more efficient since cond_data does not change
-#                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh_condcont(chain_data, 
-#                                                            condcontA, condcontB)
-
-                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh(chain_data, 
-                                                            cond_data)
-
-                chain_data = h_samples
-
-            ### update
-            chain_end = v_samples
-
-        return v_probs_means, chain_end
-
-
-    def inference2(self, input_data, cond_data, cd_k=1):
-        """
-        Defines the tensorflow operations for inference
-
-        Parameters
-        ----------
-        input_data:     tensor
-            the input (batch) data tensor
-        cond_data:      tensor
-            the condition data tensor
-        cd_k=1:         int, default 1
-            the number of CD steps for gibbs sampling
-
-        Returns
-        -------
-        v_probs_means:  tensor
-            a tensor containing the mean probabilities of the visible units
-        chain_end:      tensor
-            the last visible samples generated in the gibbs cycles
-        """
-
-        with tf.variable_scope('inference'):
-            chain_data = input_data
-
-#            condcontA = tf.matmul(cond_data, self.A)
-#            condcontB = tf.matmul(cond_data, self.B)
-            for k in range(cd_k): #TODO: this has to be more efficient since cond_data does not change
-#                v_probs_means, v_samples, h_probs_means, h_samples = self.gibbs_sample_hvh_condcont(chain_data, 
-#                                                            condcontA, condcontB)
-
-                _, v_samples, _, _ = self.gibbs_sample_vhv(chain_data, 
-                                                            cond_data)
-
-                chain_data = v_samples
-            
-
-            chain_end = tf.stop_gradient(v_samples)
-
-        return chain_end
-
-    def inference3(self, input_data, cond_data, cd_k=1):
-        def gibbs_step(i, chain_sample):
-            i = tf.add(i,1)
-            chain_sample,_, _, _ = self.gibbs_sample_vhv(chain_sample, cond_data)
-            return i, chain_sample
-
-        with tf.variable_scope('inference'):
-            counter = tf.constant(0)
-            c = lambda i, *args: tf.less(i, cd_k)
-            [_,chain_end] = tf.while_loop(c, gibbs_step, [counter, input_data], name='cd_loop')
-         
-
-        #return chain_end
-        print(chain_end.get_shape())
-        return tf.stop_gradient(chain_end)
-
-    def train_step(self, visible_data, cond_data, learning_rate,
-                   momentum=0, wdecay=0, cd_k=1):
-        """
-        Defines the operations needed for a training step of a CRBM
-
-        Parameters
-        ----------
-        visible_data:       tensor
-            the input (batch) data tensor
-        cond_data:      tensor
-            the condition data tensor
-        learning_rate:      float
-            the learning rate
-        momentum:           float, default 0
-            the momentum value
-        wdecay:             float, default 0
-            the weight decay value
-        cd_k:               int, default 1
-            the number of CD steps for gibbs sampling
-
-        Returns
-        -------
-        rec_cost:       float
-            the reconstruction cost for this step
-        new_params:     list of tensors
-            the updated model parameters
-        updates:        list of tensors
-            the value of updates for each model parameter
-        """
-        learning_rateW = learning_rate
-        learning_rateA = learning_rate * 0.01 # it's a hack, the autoregressive weights often need a smaller lr
-        learning_rateB = learning_rate
-
-        with tf.variable_scope('train_step'):
-            ## inference
-            chain_end = self.inference3(visible_data, cond_data, cd_k)
-
-            ## update
-             # get the cost using free energy
-            cost = self.get_cost(visible_data, cond_data, chain_end)
-            
-            with tf.name_scope('regularizers'):
-                # regularize
-                if self.W_regularizer is not None:
-                    cost = cost + self.W_regularizer(self.W)
-
-                if self.A_regularizer is not None:
-                    cost = cost + self.A_regularizer(self.A)
-
-                if self.B_regularizer is not None:
-                    cost = cost + self.B_regularizer(self.B)
-
-             # calculate the gradients using tf
-            grad_params = tf.gradients(ys=cost, xs=self.model_params)
-            
-
-            with tf.name_scope('updates'):
-                 # compose the update values, incorporating weight decay, momentum, and sparsity terms
-                wu_ = tf.assign(self.wu, momentum * self.wu + (grad_params[0] - wdecay * self.W) * learning_rateW)
-                au_ = tf.assign(self.au, momentum * self.au + (grad_params[1] - wdecay * self.A) * learning_rateA)
-                bu_ = tf.assign(self.bu, momentum * self.bu + (grad_params[2] - wdecay * self.B) * learning_rateB)
-                vbu_ = tf.assign(self.vbu, momentum * self.vbu + grad_params[3] * learning_rate)
-                hbu_ = tf.assign(self.hbu, momentum * self.hbu + grad_params[4] * learning_rate)
-
-                momentum_ops = [wu_, au_, bu_, vbu_, hbu_]
-
-                 # ops to update the parameters
-                update_ops = [tf.assign_sub(self.W, self.wu),
-                              tf.assign_sub(self.A, self.au),
-                              tf.assign_sub(self.B, self.bu),
-                              tf.assign_sub(self.vbias, self.vbu),
-                              tf.assign_sub(self.hbias, self.hbu)]
-
-
-        return [momentum_ops, update_ops]
-
-    def get_cost(self, v_sample, cond, chain_end):
+    def get_cost(self, v_sample, chain_end, in_data):
         """
         Calculates the free-energy cost between two data tensors, used for calcuating the gradients
     
@@ -498,13 +318,14 @@ class CRBM(AbstractRBM):
         cost:       float
             the cost
         """
+        cond = in_data[0]
 
         with tf.variable_scope('fe_cost'):
             cost = tf.reduce_mean(self.free_energy(v_sample, cond)
                     - self.free_energy(chain_end, cond), reduction_indices=0)
         return cost
 
-    def get_reconstruction_cost(self, input_data, cond_data):
+    def get_reconstruction_cost(self, vis_data, cond_data):
         """
         Calculates the reconstruction cost between input data and reconstructed data
     
@@ -520,10 +341,10 @@ class CRBM(AbstractRBM):
         cost:       float
             the reconstruction cost
         """
-        recon_means,_,_,_ = self.gibbs_sample_vhv(input_data, cond_data)
+        recon_means,_,_,_ = self.gibbs_sample_vhv(vis_data, cond_data)
 
         #cost = costs.cross_entropy(input_data, recon_means)
-        cost = costs.mse(input_data, recon_means)
+        cost = costs.mse(vis_data, recon_means)
         return cost
 
     def free_energy(self, v_sample, cond):  #TODO: change     
@@ -558,7 +379,7 @@ class CRBM(AbstractRBM):
 
         return tf.transpose(tf.transpose(v) + tf.transpose(h))        
     
-    def make_prediction(self, cond, init,  num_gibbs=20):
+    def predict(self, cond, init,  num_gibbs=20):
         """
         Generate (predict) the visible units configuration given the conditions
 
@@ -581,7 +402,7 @@ class CRBM(AbstractRBM):
 
         # gibbs
         for k in range(num_gibbs): #TODO: this has to be more efficient since cond_data does not change
-            vmean, sample, hmean, hsample = self.gibbs_sample_vhv(init, cond)
+            vmean, sample, hmean, hsample = self.gibbs_sample_vhv(init, [cond])
             init = sample
         
         # mean-field approximation as suggested by Taylor
@@ -590,92 +411,3 @@ class CRBM(AbstractRBM):
         return sample, hsample
 
 
-    def train(self, sess, input_data, cond_data, training_epochs, batch_size=100, learning_rate=0.1,
-                    snapshot_dir='./logs/', snapshot_freq=0, cd_k=1,
-                    momentum=0, wdecay=0):
-        """
-        Creates mini-batches and trains the CRBM for the given number of epochs
-
-        Parameters
-        ----------
-        input_data:         tensor
-            the input data tensor
-        cond_data:         tensor
-            the condition data tensor
-        training_epochs:    float
-            the number of training epochs
-        batch_size:         int
-            the size of each mini batch
-        learning_rate:      float, default 0.1
-            the learning rate
-        snapshot_dir:       string, default logs
-            the directory to store model snapshots and logs
-        snapshot_freq:      int, default 100
-            the frequency of the epochs to save a model snapshot
-        cd_k:               int, default 1
-            the number of CD steps for gibbs sampling
-        momentum:           float, default 0
-            the momentum value
-        wdecay:             float, default 0
-            the weight decay value
-
-        Returns
-        -------
-        W:      array_like
-            the numpy visble-hidden weight matrix
-        A:      array_like
-            the numpy condition to visible weight matrix
-        B:      array_like
-            the numpy condition to hidden weight matrix
-        vbias:      array_like
-            the numpy visible biases
-        hbias:      array_like
-            the numpy hidden biases
-        """
-
-        self.batch_size = batch_size
-        
-        # Make batches
-        batch_idxs = np.random.permutation(range(len(input_data)))
-        n_batches = len(batch_idxs) // batch_size
-        
-        # Define train ops            
-        train_op = self.train_step(self.input_data,
-                                   self.cond_data, 
-                                   learning_rate, 
-                                   momentum, 
-                                   wdecay, 
-                                   cd_k=cd_k)
-        
-        reccost_op = self.get_reconstruction_cost(self.input_data, self.cond_data)
-
-        saver = tf.train.Saver()
-
-        # Run everything in tf 
-        for epoch in range(training_epochs):
-            epoch_cost = 0
-
-            for batch_i in range(n_batches):
-                # Get just minibatch amount of data
-                idxs_i = batch_idxs[batch_i * batch_size:(batch_i + 1) * batch_size]
-                
-                # Add noise to the past, Gaussian with std 1
-                cd_noise = cond_data[idxs_i] + np.random.normal(0, 1, [batch_size, self.num_cond])
-
-                # Create the feed for the batch data
-                feed = feed_dict={self.input_data: input_data[idxs_i],
-                                  self.cond_data: cd_noise}
-
-                # Run the training step
-                sess.run(train_op, feed_dict=feed)
-
-            
-            epoch_cost = sess.run(reccost_op, feed_dict={self.input_data: input_data[idxs_i], self.cond_data: cond_data[idxs_i]})
-
-            print('Epoch %i / %i | cost = %f | lr = %f | momentum = %f'%
-                 (epoch+1, training_epochs, epoch_cost, learning_rate, momentum))
-                    
-            if snapshot_freq != 0 and (epoch+1) % snapshot_freq == 0:                
-                save_path = saver.save(sess, '%s%s_ep%i_model.ckpt' % (snapshot_dir, self.name, (epoch+1)))
-
-        return self.W.eval(session=sess), self.A.eval(session=sess), self.B.eval(session=sess), self.vbias.eval(session=sess), self.hbias.eval(session=sess)

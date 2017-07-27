@@ -1,6 +1,11 @@
 MNIST_data/
 logs/*
 
+*.swp
+examples/*.json
+examples/tf_logs/
+tf_logs/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
