@@ -62,13 +62,13 @@ class RBM():
                                      initializer=self.initializer,
                                      name='main_weights')
             #self.W = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
-            self.vbias = tfutils.bias_variable([self.num_vis], 'vbias')
-            self.hbias = tfutils.bias_variable([self.num_hid], 'hbias')
+            self.vbias = tf.get_variable(shape=[self.num_vis], initializer=tf.constant_initializer(0), name='vbias')
+            self.hbias = tf.get_variable(shape=[self.num_hid], initializer=tf.constant_initializer(0), name='hbias')
 
             self.model_params = [self.W, self.vbias, self.hbias]
 
 
-    def sample_h_from_v(self, visible, n=-1):
+    def sample_h_from_v(self, visible):
         """
         Get a sample of hidden units, given a tensor of visible units configuations
 
@@ -91,11 +91,11 @@ class RBM():
         with tf.variable_scope('sampling_hv'):
             bottom_up = tf.matmul(visible, self.W) + self.hbias
             h_probs_means = self.activation(bottom_up)
-            h_samples = tfutils.sample_bernoulli(h_probs_means, n)
+            h_samples = tfutils.sample_bernoulli(h_probs_means)
 
         return bottom_up, h_probs_means, h_samples
 
-    def sample_v_from_h(self, hidden, n=-1):
+    def sample_v_from_h(self, hidden):
         """
         Get a sample of visible units, given a tensor of hidden units configuations
 
@@ -121,7 +121,7 @@ class RBM():
             v_probs_means = self.activation(top_bottom)
 
             if self.vis_type == 'binary':                
-                v_samples = tfutils.sample_bernoulli(v_probs_means, n)
+                v_samples = tfutils.sample_bernoulli(v_probs_means)
             elif self.vis_type == 'gaussian':
                 v_samples = top_bottom # using means instead of sampling, as in Taylor et al
             else:
@@ -151,10 +151,10 @@ class RBM():
         """
         with tf.variable_scope('sampling_hvh'):
             # v from h
-            top_bottom, v_probs_means, v_samples = self.sample_v_from_h(h_samples0, n=self.batch_size)
+            top_bottom, v_probs_means, v_samples = self.sample_v_from_h(h_samples0)
 
             # h from v
-            bottom_up, h_probs_means, h_samples = self.sample_h_from_v(v_samples, n=self.batch_size)
+            bottom_up, h_probs_means, h_samples = self.sample_h_from_v(v_samples)
 
         return v_probs_means, v_samples, h_probs_means, h_samples
 
@@ -180,10 +180,10 @@ class RBM():
         """
         with tf.variable_scope('sampling_vhv'):
             # h from v
-            bottom_up, h_probs_means, h_samples = self.sample_h_from_v(v_samples0, n=tf.shape(v_samples0)[0])
+            bottom_up, h_probs_means, h_samples = self.sample_h_from_v(v_samples0)
 
             # v from h
-            top_bottom, v_probs_means, v_samples = self.sample_v_from_h(h_samples, n=tf.shape(v_samples0)[0])
+            top_bottom, v_probs_means, v_samples = self.sample_v_from_h(h_samples)
 
 
 
