@@ -6,7 +6,6 @@ from __future__ import division, print_function, absolute_import
 import tensorflow as tf
 import numpy as np
 from xrbm.utils import tfutils
-from xrbm.utils import costs as costs
 
 class RBM():
     'Restricted Boltzmann Machines (RBM)'
@@ -211,29 +210,6 @@ class RBM():
                     - self.free_energy(chain_end), reduction_indices=0)
         return cost
 
-    def get_reconstruction_cost(self, input_data):
-        """
-        Calculates the reconstruction cost between input data and reconstructed data
-    
-        Parameters
-        ----------
-        input_data:   tensor
-            the input data tensor
-        recon_means:  tensor
-            the reconstructed data tensor
-
-        Returns
-        -------
-        cost:       float
-            the reconstruction cost
-        """        
-        recon_means,_,_,_ = self.gibbs_sample_vhv(input_data)
-
-        # cost = costs.cross_entropy(input_data, recon_means)
-        cost = costs.mse(input_data, recon_means)
-        return cost
-    
-    
     def free_energy(self, v_sample): 
         """
         Calcuates the free-energy of a given visible tensor

@@ -6,7 +6,6 @@ import tensorflow as tf
 import numpy as np
 import scipy.io as sio
 from xrbm.utils import tfutils
-from xrbm.utils import costs as costs
 
 class CRBM():
     'Conditional Restricted Boltzmann Machines (CRBM)'
@@ -75,11 +74,10 @@ class CRBM():
             self.B = tf.get_variable(shape=[self.num_cond, self.num_hid], 
                                      initializer=self.initializer,
                                      name='c2h_weights')
-            #self.W = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
-            #self.A = tfutils.weight_variable([self.num_cond, self.num_vis], 'c2v_weights')
-            #self.B = tfutils.weight_variable([self.num_cond, self.num_hid], 'c2h_weights')
-            self.vbias = tfutils.bias_variable([self.num_vis], 'vbias')
-            self.hbias = tfutils.bias_variable([self.num_hid], 'hbias')
+            
+            self.vbias = tf.get_variable(shape=[self.num_vis], initializer=tf.constant_initializer(0), name='vbias')
+            
+            self.hbias = tf.get_variable(shape=[self.num_hid], initializer=tf.constant_initializer(0), name='hbias')
 
             self.model_params = [self.W, self.A, self.B, self.vbias, self.hbias]
 
@@ -299,27 +297,6 @@ class CRBM():
                     - self.free_energy(chain_end, cond), reduction_indices=0)
         return cost
 
-    def get_reconstruction_cost(self, vis_data, cond_data):
-        """
-        Calculates the reconstruction cost between input data and reconstructed data
-    
-        Parameters
-        ----------
-        input_data:   tensor
-            the input data tensor
-        recon_means:  tensor
-            the reconstructed data tensor
-
-        Returns
-        -------
-        cost:       float
-            the reconstruction cost
-        """
-        recon_means,_,_,_ = self.gibbs_sample_vhv(vis_data, cond_data)
-
-        #cost = costs.cross_entropy(input_data, recon_means)
-        cost = costs.mse(vis_data, recon_means)
-        return cost
 
     def free_energy(self, v_sample, cond):  #TODO: change     
         """
