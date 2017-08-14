@@ -4,9 +4,9 @@ import numpy as np
 
 def plot_weight(fig, W, cmap='gray'):    
     ax = fig.add_subplot(121)
-    ax.imshow(W.T, interpolation='nearest', aspect='auto', cmap=cmap)
+    ax.imshow(W, interpolation='nearest', aspect='auto', cmap=cmap)
     ax = fig.add_subplot(122)
-    ax.hist(W.T)
+    ax.hist(W)
 
     return ax
 
