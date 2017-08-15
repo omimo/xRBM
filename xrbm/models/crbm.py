@@ -6,8 +6,6 @@ import tensorflow as tf
 import numpy as np
 import scipy.io as sio
 from xrbm.utils import tfutils
-from xrbm.utils import costs as costs
-from .abstract_model import AbstractRBM
 
 class CRBM():
     'Conditional Restricted Boltzmann Machines (CRBM)'
@@ -31,6 +29,8 @@ class CRBM():
             the type of the visible units (`binary` or `gaussian`)
         activation:    callable f(h)
             a function reference to the activation function of the hidden units
+        initializer:   callable f(h)
+            a function reference to the weight initializer (TF-style)
         name:          string
             the name of the object (used for Tensorflow's scope)
         """
@@ -57,16 +57,17 @@ class CRBM():
         self.model_params = None
 
         with tf.variable_scope(self.name):
-            self.create_placeholders_variables()
+            self.create_variables()
 
-    def create_placeholders_variables(self):
+    def create_variables(self):
         """
-        Creates 
+        Creates the variables used by the model
         """
         with tf.variable_scope('params'):
             self.W = tf.get_variable(shape=[self.num_vis, self.num_hid], 
                                      initializer=self.initializer,
                                      name='vh_weights')
+<<<<<<< HEAD
 
 
             self.A = tf.get_variable(shape=[self.num_cond, self.num_vis], 
@@ -81,12 +82,31 @@ class CRBM():
             #self.B = tfutils.weight_variable([self.num_cond, self.num_hid], 'c2h_weights')
             self.vbias = tfutils.bias_variable([self.num_vis], 'vbias')
             self.hbias = tfutils.bias_variable([self.num_hid], 'hbias')
+=======
+>>>>>>> devel
+
+
+<<<<<<< HEAD
+    def sample_h_from_vc(self, visible, cond, n=-1): 
+=======
+            self.A = tf.get_variable(shape=[self.num_cond, self.num_vis], 
+                                     initializer=self.initializer,
+                                     name='c2v_weights')
+
+            self.B = tf.get_variable(shape=[self.num_cond, self.num_hid], 
+                                     initializer=self.initializer,
+                                     name='c2h_weights')
+            
+            self.vbias = tf.get_variable(shape=[self.num_vis], initializer=tf.constant_initializer(0), name='vbias')
+            
+            self.hbias = tf.get_variable(shape=[self.num_hid], initializer=tf.constant_initializer(0), name='hbias')
 
             self.model_params = [self.W, self.A, self.B, self.vbias, self.hbias]
 
-    def sample_h_from_vc(self, visible, cond, n=-1): 
+    def sample_h_from_vc(self, visible, cond): 
+>>>>>>> devel
         """
-        Get a sample of hidden units, given a tensor of visible and condition units configuations
+        Gets a sample of the hidden units, given tensors of visible and condition units
 
         Parameters
         ----------
@@ -113,13 +133,13 @@ class CRBM():
                          self.hbias) # static hidden biases
 
             h_probs_means = self.activation(bottom_up)
-            h_samples = tfutils.sample_bernoulli(h_probs_means, n)
+            h_samples = tfutils.sample_bernoulli(h_probs_means)
 
         return bottom_up, h_probs_means, h_samples
 
-    def sample_v_from_hc(self, hidden, cond, n=-1):
+    def sample_v_from_hc(self, hidden, cond):
         """
-        Get a sample of visible units, given a tensor of hidden and condition units configuations
+        Gets a sample of the visible units, given  tensors of hidden and condition units
 
         Parameters
         ----------
@@ -148,7 +168,7 @@ class CRBM():
             v_probs_means = self.activation(contributions)
 
             if self.vis_type == 'binary':                
-                v_samples = tfutils.sample_bernoulli(v_probs_means, n)
+                v_samples = tfutils.sample_bernoulli(v_probs_means)
             elif self.vis_type == 'gaussian':
                 v_samples = contributions # using means instead of sampling, as in Taylor et al
 
@@ -244,7 +264,7 @@ class CRBM():
     
     def gibbs_sample_vhv(self, v_samples0, in_data):
         """
-        Runs a cycle of gibbs sampling, started with an initial visible and condition units configurations
+        Runs a cycle of gibbs sampling, started with an initial visible and condition units
 
         Parameters
         ----------
@@ -300,6 +320,7 @@ class CRBM():
                     - self.free_energy(chain_end, cond), reduction_indices=0)
         return cost
 
+<<<<<<< HEAD
     def get_reconstruction_cost(self, vis_data, cond_data):
         """
         Calculates the reconstruction cost between input data and reconstructed data
@@ -321,8 +342,10 @@ class CRBM():
         #cost = costs.cross_entropy(input_data, recon_means)
         cost = costs.mse(vis_data, recon_means)
         return cost
+=======
+>>>>>>> devel
 
-    def free_energy(self, v_sample, cond):  #TODO: change     
+    def free_energy(self, v_sample, cond):
         """
         Calcuates the free-energy of a given visible tensor
 
@@ -354,7 +377,11 @@ class CRBM():
 
         return tf.transpose(tf.transpose(v) + tf.transpose(h))        
     
+<<<<<<< HEAD
     def predict(self, cond, init,  num_gibbs=20):
+=======
+    def predict(self, cond, init,  num_gibbs=5):
+>>>>>>> devel
         """
         Generate (predict) the visible units configuration given the conditions
 
@@ -364,7 +391,7 @@ class CRBM():
             the condition units tensor
         init:       tensor
             the configuation to initialize the visible units with
-        num_gibbs:  int, default 20
+        num_gibbs:  int, default 5
             the number of gibbs sampling cycles
 
         Returns
@@ -381,7 +408,7 @@ class CRBM():
             init = sample
         
         # mean-field approximation as suggested by Taylor
-        _, vmean, sample = self.sample_v_from_hc(hmean, cond, 1)
+        _, vmean, sample = self.sample_v_from_hc(hmean, cond)
 
         return sample, hsample
 

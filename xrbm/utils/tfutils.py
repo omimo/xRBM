@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
+<<<<<<< HEAD
 def weight_variable(shape, name='weight'):
     initial = tf.truncated_normal(shape, stddev=0.1) #TODO: right choice?
     # return tf.Variable(initial, name=name)
@@ -23,6 +24,14 @@ def sample_bernoulli(means, n=-1):
     if n==-1:
         n = tf.shape(means)[0]
     shape = [n , means.get_shape().as_list()[1]] #[n, means.get_shape()[1]]
+=======
+
+def sample_bernoulli(means):    
+    #if n==-1:
+    #    n = tf.shape(means)[0]
+    #shape = [n , means.get_shape().as_list()[1]] #[n, means.get_shape()[1]]
+    shape = tf.shape(means)
+>>>>>>> devel
     return tf.where(means - tf.random_uniform(shape) > 0, 
                                   tf.ones(shape), 
                                   tf.zeros(shape))

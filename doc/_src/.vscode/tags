@@ -1,0 +1,32 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+author	../conf.py	/^author = 'Omid Alemi'$/;"	kind:variable	line:57
+conf.py	../conf.py	1;"	kind:file	line:1
+copyright	../conf.py	/^copyright = '2017, Omid Alemi'$/;"	kind:variable	line:56
+exclude_patterns	../conf.py	/^exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']$/;"	kind:variable	line:78
+extensions	../conf.py	/^extensions = ['sphinx.ext.autodoc',$/;"	kind:variable	line:35
+html_static_path	../conf.py	/^html_static_path = ['_static']$/;"	kind:variable	line:103
+html_theme	../conf.py	/^html_theme = "sphinx_rtd_theme"$/;"	kind:variable	line:105
+html_theme	../conf.py	/^html_theme = 'alabaster'$/;"	kind:variable	line:92
+html_theme_path	../conf.py	/^html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]$/;"	kind:variable	line:107
+htmlhelp_basename	../conf.py	/^htmlhelp_basename = 'xRBMLibrarydoc'$/;"	kind:variable	line:113
+language	../conf.py	/^language = None$/;"	kind:variable	line:73
+latex_documents	../conf.py	/^latex_documents = [$/;"	kind:variable	line:139
+latex_elements	../conf.py	/^latex_elements = {$/;"	kind:variable	line:118
+man_pages	../conf.py	/^man_pages = [$/;"	kind:variable	line:149
+master_doc	../conf.py	/^master_doc = 'index'$/;"	kind:variable	line:52
+os	../conf.py	/^import os$/;"	kind:namespace	line:20
+project	../conf.py	/^project = 'xRBM Library'$/;"	kind:variable	line:55
+pygments_style	../conf.py	/^pygments_style = 'sphinx'$/;"	kind:variable	line:81
+release	../conf.py	/^release = '0.1.0'$/;"	kind:variable	line:66
+source_suffix	../conf.py	/^source_suffix = '.rst'$/;"	kind:variable	line:49
+sphinx_rtd_theme	../conf.py	/^import sphinx_rtd_theme$/;"	kind:namespace	line:24
+sys	../conf.py	/^import sys$/;"	kind:namespace	line:21
+templates_path	../conf.py	/^templates_path = ['_templates']$/;"	kind:variable	line:43
+texinfo_documents	../conf.py	/^texinfo_documents = [$/;"	kind:variable	line:160
+todo_include_todos	../conf.py	/^todo_include_todos = True$/;"	kind:variable	line:84
+version	../conf.py	/^version = '0.1.0'$/;"	kind:variable	line:64
