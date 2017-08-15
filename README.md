@@ -7,7 +7,7 @@ Implementation of Restricted Boltzmann Machine (RBM) and its variants in Tensorf
 ## Examples
 [Tutorial 1: Training an RBM on MNIST Dataset](https://github.com/omimo/xRBM/blob/master/examples/01-RBM-MNIST.ipynb)
 
-[Tutorial 2: Training an RBM on MNIST Dataset](https://github.com/omimo/xRBM/blob/master/examples/02-RBM-MNIST-Customized.ipynb)
+[Tutorial 2: Training an RBM on MNIST Dataset - More Tricks](https://github.com/omimo/xRBM/blob/master/examples/02-RBM-MNIST-Customized.ipynb)
 
 [Tutorial 3: Training a Conditional RBM on Timeseries Data](https://github.com/omimo/xRBM/blob/master/examples/03-CRBM-Wave.ipynb)
 
