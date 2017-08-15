@@ -29,6 +29,8 @@ class CRBM():
             the type of the visible units (`binary` or `gaussian`)
         activation:    callable f(h)
             a function reference to the activation function of the hidden units
+        initializer:   callable f(h)
+            a function reference to the weight initializer (TF-style)
         name:          string
             the name of the object (used for Tensorflow's scope)
         """
@@ -55,11 +57,11 @@ class CRBM():
         self.model_params = None
 
         with tf.variable_scope(self.name):
-            self.create_placeholders_variables()
+            self.create_variables()
 
-    def create_placeholders_variables(self):
+    def create_variables(self):
         """
-        Creates 
+        Creates the variables used by the model
         """
         with tf.variable_scope('params'):
             self.W = tf.get_variable(shape=[self.num_vis, self.num_hid], 
@@ -83,7 +85,7 @@ class CRBM():
 
     def sample_h_from_vc(self, visible, cond): 
         """
-        Get a sample of hidden units, given a tensor of visible and condition units configuations
+        Gets a sample of the hidden units, given tensors of visible and condition units
 
         Parameters
         ----------
@@ -116,7 +118,7 @@ class CRBM():
 
     def sample_v_from_hc(self, hidden, cond):
         """
-        Get a sample of visible units, given a tensor of hidden and condition units configuations
+        Gets a sample of the visible units, given  tensors of hidden and condition units
 
         Parameters
         ----------
@@ -241,7 +243,7 @@ class CRBM():
     
     def gibbs_sample_vhv(self, v_samples0, in_data):
         """
-        Runs a cycle of gibbs sampling, started with an initial visible and condition units configurations
+        Runs a cycle of gibbs sampling, started with an initial visible and condition units
 
         Parameters
         ----------
@@ -298,7 +300,7 @@ class CRBM():
         return cost
 
 
-    def free_energy(self, v_sample, cond):  #TODO: change     
+    def free_energy(self, v_sample, cond):
         """
         Calcuates the free-energy of a given visible tensor
 
@@ -330,7 +332,7 @@ class CRBM():
 
         return tf.transpose(tf.transpose(v) + tf.transpose(h))        
     
-    def predict(self, cond, init,  num_gibbs=2):
+    def predict(self, cond, init,  num_gibbs=5):
         """
         Generate (predict) the visible units configuration given the conditions
 
@@ -340,7 +342,7 @@ class CRBM():
             the condition units tensor
         init:       tensor
             the configuation to initialize the visible units with
-        num_gibbs:  int, default 20
+        num_gibbs:  int, default 5
             the number of gibbs sampling cycles
 
         Returns

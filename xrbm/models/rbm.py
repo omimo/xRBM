@@ -27,6 +27,8 @@ class RBM():
             the type of the visible units (`binary` or `gaussian`)
         activation:    callable f(h)
             a function reference to the activation function of the hidden units
+        initializer:   callable f(h)
+            a function reference to the weight initializer (TF-style)
         name:          string
             the name of the object (used for Tensorflow's scope)
         """
@@ -50,17 +52,17 @@ class RBM():
         self.model_params = None
 
         with tf.variable_scope(self.name):
-            self.create_placeholders_variables()
+            self.create__variables()
     
-    def create_placeholders_variables(self):
+    def create_variables(self):
         """
-        Creates the TF placeholders and variables used by the object
+        Creates the TF variables used by the model
         """
         with tf.variable_scope('params'):
             self.W = tf.get_variable(shape=[self.num_vis, self.num_hid], 
                                      initializer=self.initializer,
                                      name='main_weights')
-            #self.W = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
+            
             self.vbias = tf.get_variable(shape=[self.num_vis], initializer=tf.constant_initializer(0), name='vbias')
             self.hbias = tf.get_variable(shape=[self.num_hid], initializer=tf.constant_initializer(0), name='hbias')
 
@@ -69,7 +71,7 @@ class RBM():
 
     def sample_h_from_v(self, visible):
         """
-        Get a sample of hidden units, given a tensor of visible units configuations
+        Gets a sample of hidden units, given a tensor of visible units configuations
 
         Parameters
         ----------
@@ -130,7 +132,7 @@ class RBM():
 
     def gibbs_sample_hvh(self, h_samples0):    
         """
-        Runs a cycle of gibbs sampling, started with an initial hidden units activations
+        Runs a cycle of gibbs sampling, starting with an initial hidden units activations
 
         Parameters
         ----------
@@ -159,7 +161,7 @@ class RBM():
 
     def gibbs_sample_vhv(self, v_samples0, *data):    
         """
-        Runs a cycle of gibbs sampling, started with an initial hidden units activations
+        Runs a cycle of gibbs sampling, starting with an initial visible data
 
         Parameters
         ----------
@@ -236,5 +238,3 @@ class RBM():
             h = - tf.reduce_sum(tf.log(1 + tf.exp(bottom_up)), reduction_indices=1, name='hidden_term')
 
         return tf.transpose(tf.transpose(v) + tf.transpose(h))        
-
-

@@ -1,7 +1,7 @@
-'''
+"""
 Cost functions for xRBM Library
-Created by Omid Alemi - 2016
-'''
+Created by Omid Alemi - 2017
+"""
 
 import tensorflow as tf
 import numpy as np
