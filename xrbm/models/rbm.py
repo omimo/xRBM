@@ -6,10 +6,6 @@ from __future__ import division, print_function, absolute_import
 import tensorflow as tf
 import numpy as np
 from xrbm.utils import tfutils
-<<<<<<< HEAD
-from xrbm.utils import costs as costs
-=======
->>>>>>> devel
 
 class RBM():
     'Restricted Boltzmann Machines (RBM)'
@@ -56,7 +52,7 @@ class RBM():
         self.model_params = None
 
         with tf.variable_scope(self.name):
-            self.create__variables()
+            self.create_variables()
     
     def create_variables(self):
         """
@@ -66,15 +62,9 @@ class RBM():
             self.W = tf.get_variable(shape=[self.num_vis, self.num_hid], 
                                      initializer=self.initializer,
                                      name='main_weights')
-<<<<<<< HEAD
-            #self.W = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
-            self.vbias = tfutils.bias_variable([self.num_vis], 'vbias')
-            self.hbias = tfutils.bias_variable([self.num_hid], 'hbias')
-=======
             
             self.vbias = tf.get_variable(shape=[self.num_vis], initializer=tf.constant_initializer(0), name='vbias')
             self.hbias = tf.get_variable(shape=[self.num_hid], initializer=tf.constant_initializer(0), name='hbias')
->>>>>>> devel
 
             self.model_params = [self.W, self.vbias, self.hbias]
 
@@ -171,11 +161,7 @@ class RBM():
 
     def gibbs_sample_vhv(self, v_samples0, *data):    
         """
-<<<<<<< HEAD
-        Runs a cycle of gibbs sampling, started with an initial hidden units activations
-=======
         Runs a cycle of gibbs sampling, starting with an initial visible data
->>>>>>> devel
 
         Parameters
         ----------
@@ -195,19 +181,10 @@ class RBM():
         """
         with tf.variable_scope('sampling_vhv'):
             # h from v
-<<<<<<< HEAD
-            bottom_up, h_probs_means, h_samples = self.sample_h_from_v(v_samples0, n=tf.shape(v_samples0)[0])
-
-            # v from h
-            top_bottom, v_probs_means, v_samples = self.sample_v_from_h(h_samples, n=tf.shape(v_samples0)[0])
-=======
             bottom_up, h_probs_means, h_samples = self.sample_h_from_v(v_samples0)
 
             # v from h
             top_bottom, v_probs_means, v_samples = self.sample_v_from_h(h_samples)
->>>>>>> devel
-
-
 
         return v_probs_means, v_samples, h_probs_means, h_samples
 
@@ -233,32 +210,6 @@ class RBM():
                     - self.free_energy(chain_end), reduction_indices=0)
         return cost
 
-<<<<<<< HEAD
-    def get_reconstruction_cost(self, input_data):
-        """
-        Calculates the reconstruction cost between input data and reconstructed data
-    
-        Parameters
-        ----------
-        input_data:   tensor
-            the input data tensor
-        recon_means:  tensor
-            the reconstructed data tensor
-
-        Returns
-        -------
-        cost:       float
-            the reconstruction cost
-        """        
-        recon_means,_,_,_ = self.gibbs_sample_vhv(input_data)
-
-        # cost = costs.cross_entropy(input_data, recon_means)
-        cost = costs.mse(input_data, recon_means)
-        return cost
-    
-    
-=======
->>>>>>> devel
     def free_energy(self, v_sample): 
         """
         Calcuates the free-energy of a given visible tensor
@@ -285,8 +236,3 @@ class RBM():
             h = - tf.reduce_sum(tf.log(1 + tf.exp(bottom_up)), reduction_indices=1, name='hidden_term')
 
         return tf.transpose(tf.transpose(v) + tf.transpose(h))        
-<<<<<<< HEAD
-
-
-=======
->>>>>>> devel

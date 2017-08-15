@@ -1,13 +1,4 @@
-<<<<<<< HEAD
-import matplotlib as mpl
-#mpl.use('Agg')
-import matplotlib.pyplot as plt
-import numpy
-=======
-#:import matplotlib.pyplot as plt
 import numpy as np
->>>>>>> devel
-
 
 def plot_weight(fig, W, cmap='gray'):    
     ax = fig.add_subplot(121)

@@ -67,8 +67,6 @@ class CRBM():
             self.W = tf.get_variable(shape=[self.num_vis, self.num_hid], 
                                      initializer=self.initializer,
                                      name='vh_weights')
-<<<<<<< HEAD
-
 
             self.A = tf.get_variable(shape=[self.num_cond, self.num_vis], 
                                      initializer=self.initializer,
@@ -77,34 +75,11 @@ class CRBM():
             self.B = tf.get_variable(shape=[self.num_cond, self.num_hid], 
                                      initializer=self.initializer,
                                      name='c2h_weights')
-            #self.W = tfutils.weight_variable([self.num_vis, self.num_hid], 'main_weights')
-            #self.A = tfutils.weight_variable([self.num_cond, self.num_vis], 'c2v_weights')
-            #self.B = tfutils.weight_variable([self.num_cond, self.num_hid], 'c2h_weights')
+            
             self.vbias = tfutils.bias_variable([self.num_vis], 'vbias')
             self.hbias = tfutils.bias_variable([self.num_hid], 'hbias')
-=======
->>>>>>> devel
-
-
-<<<<<<< HEAD
-    def sample_h_from_vc(self, visible, cond, n=-1): 
-=======
-            self.A = tf.get_variable(shape=[self.num_cond, self.num_vis], 
-                                     initializer=self.initializer,
-                                     name='c2v_weights')
-
-            self.B = tf.get_variable(shape=[self.num_cond, self.num_hid], 
-                                     initializer=self.initializer,
-                                     name='c2h_weights')
-            
-            self.vbias = tf.get_variable(shape=[self.num_vis], initializer=tf.constant_initializer(0), name='vbias')
-            
-            self.hbias = tf.get_variable(shape=[self.num_hid], initializer=tf.constant_initializer(0), name='hbias')
-
-            self.model_params = [self.W, self.A, self.B, self.vbias, self.hbias]
 
     def sample_h_from_vc(self, visible, cond): 
->>>>>>> devel
         """
         Gets a sample of the hidden units, given tensors of visible and condition units
 
@@ -320,30 +295,6 @@ class CRBM():
                     - self.free_energy(chain_end, cond), reduction_indices=0)
         return cost
 
-<<<<<<< HEAD
-    def get_reconstruction_cost(self, vis_data, cond_data):
-        """
-        Calculates the reconstruction cost between input data and reconstructed data
-    
-        Parameters
-        ----------
-        input_data:   tensor
-            the input data tensor
-        recon_means:  tensor
-            the reconstructed data tensor
-
-        Returns
-        -------
-        cost:       float
-            the reconstruction cost
-        """
-        recon_means,_,_,_ = self.gibbs_sample_vhv(vis_data, cond_data)
-
-        #cost = costs.cross_entropy(input_data, recon_means)
-        cost = costs.mse(vis_data, recon_means)
-        return cost
-=======
->>>>>>> devel
 
     def free_energy(self, v_sample, cond):
         """
@@ -377,11 +328,7 @@ class CRBM():
 
         return tf.transpose(tf.transpose(v) + tf.transpose(h))        
     
-<<<<<<< HEAD
-    def predict(self, cond, init,  num_gibbs=20):
-=======
     def predict(self, cond, init,  num_gibbs=5):
->>>>>>> devel
         """
         Generate (predict) the visible units configuration given the conditions
 
