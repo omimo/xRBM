@@ -6,7 +6,7 @@ examples/*.json
 examples/tf_logs/
 tf_logs/
 
-doc/_src/_build/*
+docs/_src/_build/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
