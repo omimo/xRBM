@@ -76,8 +76,14 @@ class CRBM():
                                      initializer=self.initializer,
                                      name='c2h_weights')
             
-            self.vbias = tfutils.bias_variable([self.num_vis], 'vbias')
-            self.hbias = tfutils.bias_variable([self.num_hid], 'hbias')
+            self.vbias = tf.get_variable(shape=[self.num_vis], 
+                                         initializer=tf.constant_initializer(0), 
+                                         name='vbias')
+            self.hbias = tf.get_variable(shape=[self.num_hid], 
+                                         initializer=tf.constant_initializer(0), 
+                                         name='hbias')
+
+            self.model_params = [self.W, self.A, self.B, self.vbias, self.hbias]
 
     def sample_h_from_vc(self, visible, cond): 
         """
