@@ -1,0 +1,590 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>xrbm.models.crbm &mdash; xRBM Library 0.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="xRBM Library 0.1.0 documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> xRBM Library
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Models:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../rbm.html">Restricted Boltzmann Machine (RBM)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../crbm.html">Conditional Restricted Boltzmann Machine (CRBM)</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">xRBM Library</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>xrbm.models.crbm</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for xrbm.models.crbm</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Conditional Restricted Boltzmann Machines (CRBM) Implementation in Tensorflow</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">sio</span>
+<span class="kn">from</span> <span class="nn">xrbm.utils</span> <span class="k">import</span> <span class="n">tfutils</span>
+
+<div class="viewcode-block" id="CRBM"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM">[docs]</a><span class="k">class</span> <span class="nc">CRBM</span><span class="p">():</span>
+    <span class="s1">&#39;Conditional Restricted Boltzmann Machines (CRBM)&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_vis</span><span class="p">,</span> <span class="n">num_cond</span><span class="p">,</span> <span class="n">num_hid</span><span class="p">,</span> <span class="n">vis_type</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">,</span>
+                 <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">,</span>  
+                 <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">variance_scaling_initializer</span><span class="p">(),</span> <span class="c1"># He Init</span>
+                 <span class="n">name</span><span class="o">=</span><span class="s1">&#39;CRBM&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The CRBM Constructor</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        num_vis:       int</span>
+<span class="sd">            number of visible input units</span>
+<span class="sd">        num_cond:       int</span>
+<span class="sd">            number of condition units</span>
+<span class="sd">        num_hid:       int</span>
+<span class="sd">            number of hidden units</span>
+<span class="sd">        vis_type:      string</span>
+<span class="sd">            the type of the visible units (`binary` or `gaussian`)</span>
+<span class="sd">        activation:    callable f(h)</span>
+<span class="sd">            a function reference to the activation function of the hidden units</span>
+<span class="sd">        initializer:   callable f(h)</span>
+<span class="sd">            a function reference to the weight initializer (TF-style)</span>
+<span class="sd">        name:          string</span>
+<span class="sd">            the name of the object (used for Tensorflow&#39;s scope)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1"># Model Param</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span> <span class="o">=</span> <span class="n">num_vis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span> <span class="o">=</span> <span class="n">num_hid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">=</span> <span class="n">vis_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">activation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initializer</span> <span class="o">=</span> <span class="n">initializer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_cond</span> <span class="o">=</span> <span class="n">num_cond</span>
+
+        <span class="c1"># Weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Biases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Learning params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_variables</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CRBM.create_variables"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.create_variables">[docs]</a>    <span class="k">def</span> <span class="nf">create_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates the variables used by the model</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;params&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">W</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> 
+                                     <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializer</span><span class="p">,</span>
+                                     <span class="n">name</span><span class="o">=</span><span class="s1">&#39;vh_weights&#39;</span><span class="p">)</span>
+
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">],</span> 
+                                     <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializer</span><span class="p">,</span>
+                                     <span class="n">name</span><span class="o">=</span><span class="s1">&#39;c2v_weights&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> 
+                                     <span class="n">initializer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initializer</span><span class="p">,</span>
+                                     <span class="n">name</span><span class="o">=</span><span class="s1">&#39;c2h_weights&#39;</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_vis</span><span class="p">],</span> <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;vbias&#39;</span><span class="p">)</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">get_variable</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_hid</span><span class="p">],</span> <span class="n">initializer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant_initializer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;hbias&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_params</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="CRBM.sample_h_from_vc"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.sample_h_from_vc">[docs]</a>    <span class="k">def</span> <span class="nf">sample_h_from_vc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">visible</span><span class="p">,</span> <span class="n">cond</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets a sample of the hidden units, given tensors of visible and condition units</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        visible:    tensor</span>
+<span class="sd">            a tensor of visible units configurations</span>
+<span class="sd">        </span>
+<span class="sd">        cond:    tensor</span>
+<span class="sd">            a tensor of condition units configurations</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bottom_up:      tensor</span>
+<span class="sd">            a tensor containing the bottom up contributions before activation</span>
+<span class="sd">        </span>
+<span class="sd">        h_prob_means:   tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the hidden units activations</span>
+
+<span class="sd">        h_samples:      tensor</span>
+<span class="sd">            a tensor containing a bernoulli sample generated from the mean activations</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;sampling_hv&#39;</span><span class="p">):</span>
+            <span class="n">bottom_up</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">visible</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># visible to hidden </span>
+                         <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span> <span class="o">+</span>  <span class="c1"># condition to hidden</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="p">)</span> <span class="c1"># static hidden biases</span>
+
+            <span class="n">h_probs_means</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">bottom_up</span><span class="p">)</span>
+            <span class="n">h_samples</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">sample_bernoulli</span><span class="p">(</span><span class="n">h_probs_means</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">bottom_up</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span></div>
+
+<div class="viewcode-block" id="CRBM.sample_v_from_hc"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.sample_v_from_hc">[docs]</a>    <span class="k">def</span> <span class="nf">sample_v_from_hc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden</span><span class="p">,</span> <span class="n">cond</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets a sample of the visible units, given  tensors of hidden and condition units</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        hidden:    tensor</span>
+<span class="sd">            a tensor of hidden units configurations</span>
+
+<span class="sd">        cond:    tensor</span>
+<span class="sd">            a tensor of condition units configurations</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        top_bottom:      tensor</span>
+<span class="sd">            a tensor containing the top bottom contributions</span>
+<span class="sd">        </span>
+<span class="sd">        v_probs_means:   tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the visible units</span>
+
+<span class="sd">        v_samples:      tensor</span>
+<span class="sd">            a tensor containing a sample of visible units generated from the top bottom contributions</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;sampling_vh&#39;</span><span class="p">):</span>
+            <span class="n">contributions</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">hidden</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;hidden_to_visible&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># hidden to visible</span>
+                          <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;condition_to_visible&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># condition to visible</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="p">)</span> <span class="c1"># static visible biases</span>
+
+            <span class="n">v_probs_means</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">contributions</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>                
+                <span class="n">v_samples</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">sample_bernoulli</span><span class="p">(</span><span class="n">v_probs_means</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">:</span>
+                <span class="n">v_samples</span> <span class="o">=</span> <span class="n">contributions</span> <span class="c1"># using means instead of sampling, as in Taylor et al</span>
+
+
+        <span class="k">return</span> <span class="n">contributions</span><span class="p">,</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span></div>
+
+<div class="viewcode-block" id="CRBM.gibbs_sample_hvh"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.gibbs_sample_hvh">[docs]</a>    <span class="k">def</span> <span class="nf">gibbs_sample_hvh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_samples0</span><span class="p">,</span> <span class="n">cond</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs a cycle of gibbs sampling, started with an initial hidden units activations</span>
+
+<span class="sd">        Used for training</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        h_samples0:    tensor</span>
+<span class="sd">            a tensor of initial hidden units activations</span>
+<span class="sd">        </span>
+<span class="sd">        cond:    tensor</span>
+<span class="sd">            a tensor of condition units configurations</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        v_probs_means:  tensor</span>
+
+<span class="sd">        v_samples:      tensor</span>
+<span class="sd">            visible samples</span>
+<span class="sd">        h_probs_means:  tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the hidden units activations</span>
+<span class="sd">        h_samples:      tensor</span>
+<span class="sd">            a tensor containing a bernoulli sample generated from the mean activations</span>
+<span class="sd">        &quot;&quot;&quot;</span>       
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;sampling_hvh&#39;</span><span class="p">):</span>
+            <span class="c1"># v from h</span>
+            <span class="n">top_bottom</span><span class="p">,</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_v_from_hc</span><span class="p">(</span><span class="n">h_samples0</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+
+            <span class="c1"># h from v</span>
+            <span class="n">bottom_up</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_h_from_vc</span><span class="p">(</span><span class="n">v_samples</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span></div>
+
+<div class="viewcode-block" id="CRBM.gibbs_sample_hvh_condcont"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.gibbs_sample_hvh_condcont">[docs]</a>    <span class="k">def</span> <span class="nf">gibbs_sample_hvh_condcont</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h_samples0</span><span class="p">,</span> <span class="n">condontA</span><span class="p">,</span> <span class="n">condontB</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs a cycle of gibbs sampling, started with an initial hidden units activations</span>
+
+<span class="sd">        Uses pre-computed contributions from condition units to both hidden and visible units</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        h_samples0:    tensor</span>
+<span class="sd">            a tensor of initial hidden units activations</span>
+<span class="sd">        </span>
+<span class="sd">        condontA:    tensor</span>
+<span class="sd">            a tensor of contributions from condition to visible units</span>
+
+<span class="sd">        condontB:    tensor</span>
+<span class="sd">            a tensor of contributions from condition to hidden units</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        v_probs_means:  tensor</span>
+
+<span class="sd">        v_samples:      tensor</span>
+<span class="sd">            visible samples</span>
+<span class="sd">        h_probs_means:  tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the hidden units activations</span>
+<span class="sd">        h_samples:      tensor</span>
+<span class="sd">            a tensor containing a bernoulli sample generated from the mean activations</span>
+<span class="sd">        &quot;&quot;&quot;</span>               
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;sampling_hvh&#39;</span><span class="p">):</span>
+            <span class="c1"># v from h</span>
+            <span class="n">contributions_to_vis</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">h_samples0</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">))</span> <span class="o">+</span> <span class="c1"># hidden to visible</span>
+                          <span class="n">condontA</span> <span class="o">+</span> <span class="c1"># condition to visible</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span><span class="p">)</span> <span class="c1"># static visible biases</span>
+
+            <span class="n">v_probs_means</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">contributions_to_vis</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>                
+                <span class="n">v_samples</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">sample_bernoulli</span><span class="p">(</span><span class="n">v_probs_means</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">:</span>
+                <span class="n">v_samples</span> <span class="o">=</span> <span class="n">contributions_to_vis</span> <span class="c1"># using means instead of sampling, as in Taylor et al</span>
+
+
+            <span class="c1"># h from v            </span>
+            <span class="n">contributions_to_hid</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">v_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># visible to hidden </span>
+                         <span class="n">condontB</span> <span class="o">+</span>  <span class="c1"># condition to hidden</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="p">)</span> <span class="c1"># static hidden biases</span>
+
+            <span class="n">h_probs_means</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="n">contributions_to_hid</span><span class="p">)</span>
+            <span class="n">h_samples</span> <span class="o">=</span> <span class="n">tfutils</span><span class="o">.</span><span class="n">sample_bernoulli</span><span class="p">(</span><span class="n">h_probs_means</span><span class="p">)</span>
+
+
+        <span class="k">return</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span></div>
+    
+<div class="viewcode-block" id="CRBM.gibbs_sample_vhv"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.gibbs_sample_vhv">[docs]</a>    <span class="k">def</span> <span class="nf">gibbs_sample_vhv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_samples0</span><span class="p">,</span> <span class="n">in_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs a cycle of gibbs sampling, started with an initial visible and condition units</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_samples0:    tensor</span>
+<span class="sd">            a tensor of initial visible units configuration</span>
+<span class="sd">        </span>
+<span class="sd">        cond:    tensor</span>
+<span class="sd">            a tensor of condition units configurations</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        v_probs_means:  tensor</span>
+
+<span class="sd">        v_samples:      tensor</span>
+<span class="sd">            visible samples</span>
+<span class="sd">        h_probs_means:  tensor</span>
+<span class="sd">            a tensor containing the mean probabilities of the hidden units activations</span>
+<span class="sd">        h_samples:      tensor</span>
+<span class="sd">            a tensor containing a bernoulli sample generated from the mean activations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="n">in_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;sampling_vhv&#39;</span><span class="p">):</span>
+            <span class="c1"># h from v</span>
+            <span class="n">bottom_up</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_h_from_vc</span><span class="p">(</span><span class="n">v_samples0</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+
+            <span class="c1"># v from h</span>
+            <span class="n">top_bottom</span><span class="p">,</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_v_from_hc</span><span class="p">(</span><span class="n">h_samples</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">v_probs_means</span><span class="p">,</span> <span class="n">v_samples</span><span class="p">,</span> <span class="n">h_probs_means</span><span class="p">,</span> <span class="n">h_samples</span></div>
+
+<div class="viewcode-block" id="CRBM.get_cost"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.get_cost">[docs]</a>    <span class="k">def</span> <span class="nf">get_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_sample</span><span class="p">,</span> <span class="n">chain_end</span><span class="p">,</span> <span class="n">in_data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates the free-energy cost between two data tensors, used for calcuating the gradients</span>
+<span class="sd">    </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_sample:   tensor</span>
+<span class="sd">            the tensor A</span>
+<span class="sd">        cond:   tensor</span>
+<span class="sd">            the condition tensor</span>
+<span class="sd">        chain_end:  tensor</span>
+<span class="sd">            the tensor B</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        cost:       float</span>
+<span class="sd">            the cost</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="n">in_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;fe_cost&#39;</span><span class="p">):</span>
+            <span class="n">cost</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">free_energy</span><span class="p">(</span><span class="n">v_sample</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+                    <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">free_energy</span><span class="p">(</span><span class="n">chain_end</span><span class="p">,</span> <span class="n">cond</span><span class="p">),</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cost</span></div>
+
+
+<div class="viewcode-block" id="CRBM.free_energy"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.free_energy">[docs]</a>    <span class="k">def</span> <span class="nf">free_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v_sample</span><span class="p">,</span> <span class="n">cond</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calcuates the free-energy of a given visible tensor</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        v_sample:   tensor</span>
+<span class="sd">            the visible units tensor</span>
+<span class="sd">        cond:       tensor</span>
+<span class="sd">            the condition units tensor</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        e:  float</span>
+<span class="sd">            the free energy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">variable_scope</span><span class="p">(</span><span class="s1">&#39;free_energy&#39;</span><span class="p">):</span>
+            <span class="n">bottom_up</span> <span class="o">=</span> <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">v_sample</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">W</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># visible to hidden </span>
+                         <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">B</span><span class="p">)</span> <span class="o">+</span> <span class="c1"># condition to hidden</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">hbias</span><span class="p">)</span> <span class="c1"># static hidden biases</span>
+            
+            <span class="n">vbias_n_cond</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vbias</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">A</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;binary&#39;</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">v_sample</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">vbias_n_cond</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;bin_visible_term&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">vis_type</span> <span class="o">==</span> <span class="s1">&#39;gaussian&#39;</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">v_sample</span> <span class="o">-</span> <span class="n">vbias_n_cond</span><span class="p">),</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;gauss_visible_term&#39;</span><span class="p">)</span>            
+
+            <span class="n">h</span> <span class="o">=</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">bottom_up</span><span class="p">)),</span> <span class="n">reduction_indices</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;hidden_term&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>        </div>
+    
+<div class="viewcode-block" id="CRBM.predict"><a class="viewcode-back" href="../../../xrbm.models.html#xrbm.models.crbm.CRBM.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cond</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span>  <span class="n">num_gibbs</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate (predict) the visible units configuration given the conditions</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------        </span>
+<span class="sd">        cond:       tensor</span>
+<span class="sd">            the condition units tensor</span>
+<span class="sd">        init:       tensor</span>
+<span class="sd">            the configuation to initialize the visible units with</span>
+<span class="sd">        num_gibbs:  int, default 5</span>
+<span class="sd">            the number of gibbs sampling cycles</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        sample:     tensor</span>
+<span class="sd">            the predicted visible units</span>
+<span class="sd">        hsample:    tensor</span>
+<span class="sd">            the hidden units activations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># gibbs</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_gibbs</span><span class="p">):</span> <span class="c1">#TODO: this has to be more efficient since cond_data does not change</span>
+            <span class="n">vmean</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">hmean</span><span class="p">,</span> <span class="n">hsample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gibbs_sample_vhv</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="p">[</span><span class="n">cond</span><span class="p">])</span>
+            <span class="n">init</span> <span class="o">=</span> <span class="n">sample</span>
+        
+        <span class="c1"># mean-field approximation as suggested by Taylor</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">vmean</span><span class="p">,</span> <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_v_from_hc</span><span class="p">(</span><span class="n">hmean</span><span class="p">,</span> <span class="n">cond</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sample</span><span class="p">,</span> <span class="n">hsample</span></div></div>
+
+
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Omid Alemi.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
