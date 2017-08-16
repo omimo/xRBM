@@ -1,8 +1,10 @@
 # xRBM Library
 Implementation of Restricted Boltzmann Machine (RBM) and its variants in Tensorflow
 
-## Documentation
-[https://omid.al/xRBM/](https://omid.al/xRBM/)
+## Installation
+Using pip:
+
+```pip install xrbm```
 
 ## Examples
 [Tutorial 1: Training an RBM on MNIST Dataset](https://github.com/omimo/xRBM/blob/master/examples/01-RBM-MNIST.ipynb)
@@ -11,6 +13,9 @@ Implementation of Restricted Boltzmann Machine (RBM) and its variants in Tensorf
 
 [Tutorial 3: Training a Conditional RBM on Timeseries Data](https://github.com/omimo/xRBM/blob/master/examples/03-CRBM-Wave.ipynb)
 
+
+## Documentation
+[https://omid.al/xRBM/](https://omid.al/xRBM/)
 
 ## Feedback, Bugs, and Questions
 For any questions, feedback, and bug reports, please use the [Github Issues](https://github.com/omimo/xRBM/issues).
