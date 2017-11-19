@@ -326,7 +326,7 @@ class CRBM():
             vbias_n_cond = self.vbias + tf.matmul(cond, self.A)
 
             if self.vis_type == 'binary':
-                v = - tf.matmul(v_sample, tf.expand_dims(vbias_n_cond,1), name='bin_visible_term')
+                v = - tf.matmul(v_sample, vbias_n_cond, transpose_b=True, name='bin_visible_term')
             elif self.vis_type == 'gaussian':
                 v = tf.reduce_sum(0.5 * tf.square(v_sample - vbias_n_cond), reduction_indices=1, name='gauss_visible_term')            
 
